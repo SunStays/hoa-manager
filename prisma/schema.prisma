@@ -39,6 +39,9 @@ model Unit {
   status              String               @default("occupied")
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
+  pmName              String?
+  pmPhone             String?
+  pmEmail             String?
   maintenanceRequests MaintenanceRequest[]
   payments            Payment[]
   voteResponses       VoteResponse[]

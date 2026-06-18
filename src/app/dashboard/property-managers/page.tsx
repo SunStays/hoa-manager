@@ -1,0 +1,221 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+type Unit = {
+  id: string;
+  unitNumber: string;
+  pmName: string | null;
+  pmPhone: string | null;
+  pmEmail: string | null;
+  residents: { name: string }[];
+};
+
+const emptyPm = { pmName: "", pmPhone: "", pmEmail: "" };
+
+export default function PropertyManagersPage() {
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editUnit, setEditUnit] = useState<Unit | null>(null);
+  const [form, setForm] = useState(emptyPm);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  async function load() {
+    const res = await fetch("/api/units");
+    const data = await res.json();
+    setUnits(Array.isArray(data) ? data : []);
+    setLoading(false);
+  }
+
+  useEffect(() => { load(); }, []);
+
+  function openEdit(unit: Unit) {
+    setEditUnit(unit);
+    setForm({
+      pmName: unit.pmName ?? "",
+      pmPhone: unit.pmPhone ?? "",
+      pmEmail: unit.pmEmail ?? "",
+    });
+    setError("");
+  }
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editUnit) return;
+    setSaving(true);
+    setError("");
+
+    const res = await fetch(`/api/units/${editUnit.id}/manager`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+
+    if (!res.ok) {
+      const d = await res.json();
+      setError(d.error || "Something went wrong.");
+      setSaving(false);
+      return;
+    }
+
+    setEditUnit(null);
+    setSaving(false);
+    load();
+  }
+
+  async function handleClear(unit: Unit) {
+    await fetch(`/api/units/${unit.id}/manager`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pmName: null, pmPhone: null, pmEmail: null }),
+    });
+    load();
+  }
+
+  const withManager = units.filter((u) => u.pmName);
+  const withoutManager = units.filter((u) => !u.pmName);
+
+  return (
+    <div>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Property Managers</h1>
+        <p className="text-gray-500 text-sm mt-0.5">Property manager per apartment</p>
+      </div>
+
+      {loading ? (
+        <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>
+      ) : (
+        <div className="space-y-6">
+          {/* Summary stats */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white rounded-xl border border-gray-100 p-4">
+              <p className="text-sm text-gray-500">With manager</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">{withManager.length}</p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-100 p-4">
+              <p className="text-sm text-gray-500">No manager set</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">{withoutManager.length}</p>
+            </div>
+          </div>
+
+          {/* Units with manager */}
+          {withManager.length > 0 && (
+            <section>
+              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Assigned</h2>
+              <div className="space-y-3">
+                {withManager.map((unit) => (
+                  <div key={unit.id} className="bg-white rounded-xl border border-gray-100 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-bold text-gray-900">Unit #{unit.unitNumber}</span>
+                          {unit.residents.length > 0 && (
+                            <span className="text-xs text-gray-400">· {unit.residents.map((r) => r.name).join(", ")}</span>
+                          )}
+                        </div>
+                        <p className="text-sm font-semibold text-gray-800">{unit.pmName}</p>
+                        <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5">
+                          {unit.pmPhone && (
+                            <a href={`tel:${unit.pmPhone}`} className="text-sm text-blue-600 hover:underline">
+                              📞 {unit.pmPhone}
+                            </a>
+                          )}
+                          {unit.pmEmail && (
+                            <a href={`mailto:${unit.pmEmail}`} className="text-sm text-blue-600 hover:underline">
+                              ✉️ {unit.pmEmail}
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-2 shrink-0">
+                        <button onClick={() => openEdit(unit)} className="text-xs font-medium text-blue-600 hover:underline">Edit</button>
+                        <button onClick={() => handleClear(unit)} className="text-xs font-medium text-red-400 hover:underline">Clear</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Units without manager */}
+          {withoutManager.length > 0 && (
+            <section>
+              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">No manager assigned</h2>
+              <div className="space-y-2">
+                {withoutManager.map((unit) => (
+                  <div key={unit.id} className="bg-white rounded-xl border border-gray-100 px-4 py-3 flex items-center justify-between">
+                    <div>
+                      <span className="font-medium text-gray-900">Unit #{unit.unitNumber}</span>
+                      {unit.residents.length > 0 && (
+                        <span className="text-xs text-gray-400 ml-2">{unit.residents.map((r) => r.name).join(", ")}</span>
+                      )}
+                    </div>
+                    <button onClick={() => openEdit(unit)} className="text-sm font-medium text-blue-600 hover:underline">+ Add</button>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+      )}
+
+      {/* Edit / Add modal */}
+      {editUnit && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-1">
+              {editUnit.pmName ? "Edit property manager" : "Add property manager"}
+            </h2>
+            <p className="text-sm text-gray-500 mb-5">Unit #{editUnit.unitNumber}</p>
+            <form onSubmit={handleSave} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Full name *</label>
+                <input
+                  type="text"
+                  value={form.pmName}
+                  onChange={(e) => setForm({ ...form, pmName: e.target.value })}
+                  required
+                  placeholder="e.g. Maria Bosman"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <input
+                  type="tel"
+                  value={form.pmPhone}
+                  onChange={(e) => setForm({ ...form, pmPhone: e.target.value })}
+                  placeholder="+297 700 0000"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={form.pmEmail}
+                  onChange={(e) => setForm({ ...form, pmEmail: e.target.value })}
+                  placeholder="manager@example.com"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {error && <p className="text-red-600 text-sm bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
+
+              <div className="flex gap-3 pt-1">
+                <button type="button" onClick={() => setEditUnit(null)} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50">
+                  Cancel
+                </button>
+                <button type="submit" disabled={saving} className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                  {saving ? "Saving..." : "Save"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

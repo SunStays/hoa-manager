@@ -13,7 +13,7 @@ const navigation = [
   { name: "Announcements", href: "/dashboard/announcements", icon: "📣" },
   { name: "Documents", href: "/dashboard/documents", icon: "📁" },
   { name: "Votes", href: "/dashboard/votes", icon: "🗳️" },
-  { name: "Amenities", href: "/dashboard/amenities", icon: "🏊" },
+  { name: "Property Managers", href: "/dashboard/property-managers", icon: "🏢" },
   { name: "Settings", href: "/dashboard/settings", icon: "⚙️" },
 ];
 
