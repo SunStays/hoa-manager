@@ -27,6 +27,8 @@ export default function AnnouncementsPage() {
   const [editItem, setEditItem] = useState<Announcement | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [sendingTest, setSendingTest] = useState(false);
+  const [testSent, setTestSent] = useState(false);
   const [error, setError] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -51,6 +53,20 @@ export default function AnnouncementsPage() {
     setForm({ title: a.title, body: a.body, pinned: a.pinned });
     setError("");
     setShowModal(true);
+  }
+
+  async function sendTestEmail() {
+    if (!form.title || !form.body) { setError("Fill in subject and message first."); return; }
+    setSendingTest(true);
+    setError("");
+    const res = await fetch("/api/announcements/test-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: form.title, body: form.body }),
+    });
+    setSendingTest(false);
+    if (res.ok) { setTestSent(true); setTimeout(() => setTestSent(false), 4000); }
+    else { const d = await res.json(); setError(d.error || "Failed to send test."); }
   }
 
   async function handleSave(e: React.FormEvent) {
@@ -165,13 +181,23 @@ export default function AnnouncementsPage() {
               </label>
 
               {error && <p className="text-red-600 text-sm bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
+              {testSent && <p className="text-green-700 text-sm bg-green-50 px-3 py-2 rounded-lg">✅ Test email sent to your inbox!</p>}
 
-              <div className="flex gap-3 pt-1">
+              <button
+                type="button"
+                onClick={sendTestEmail}
+                disabled={sendingTest}
+                className="w-full px-4 py-2 border border-gray-300 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                {sendingTest ? "Sending test..." : "📧 Send test email to me"}
+              </button>
+
+              <div className="flex gap-3">
                 <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
                   Cancel
                 </button>
                 <button type="submit" disabled={saving} className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50">
-                  {saving ? "Posting..." : editItem ? "Save changes" : "Post announcement"}
+                  {saving ? "Posting..." : editItem ? "Save changes" : "Post to all residents"}
                 </button>
               </div>
             </form>
