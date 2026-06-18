@@ -276,11 +276,11 @@ export default function DocumentsPage() {
                 <input
                   ref={fileRef}
                   type="file"
-                  accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.bmp,.tiff,.heic,.heif,.eml,.msg,.txt,.csv,.zip"
                   onChange={(e) => setFile(e.target.files?.[0] ?? null)}
                   className="w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                 />
-                <p className="text-xs text-gray-400 mt-1">PDF, Word, Excel, or image — max 10 MB</p>
+                <p className="text-xs text-gray-400 mt-1">PDF, Word, Excel, PowerPoint, images, screenshots, emails (.eml/.msg), CSV, ZIP — max 10 MB</p>
               </div>
               {file && <div className="bg-gray-50 rounded-lg px-3 py-2 text-xs text-gray-600">{file.name} — {formatBytes(file.size)}</div>}
               {uploadError && <p className="text-red-600 text-sm bg-red-50 px-3 py-2 rounded-lg">{uploadError}</p>}
