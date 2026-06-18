@@ -9,8 +9,7 @@ type Resident = {
   email: string;
   phone: string | null;
   role: string;
-  unitId: string | null;
-  unit: Unit | null;
+  units: Unit[];
 };
 
 const emptyForm = {
@@ -18,7 +17,7 @@ const emptyForm = {
   email: "",
   phone: "",
   role: "resident" as "resident" | "board" | "admin",
-  unitId: "",
+  unitIds: [] as string[],
 };
 
 const roleLabel: Record<string, string> = {
@@ -45,10 +44,7 @@ export default function ResidentsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   async function loadData() {
-    const [rRes, uRes] = await Promise.all([
-      fetch("/api/residents"),
-      fetch("/api/units"),
-    ]);
+    const [rRes, uRes] = await Promise.all([fetch("/api/residents"), fetch("/api/units")]);
     const rData = await rRes.json();
     const uData = await uRes.json();
     setResidents(Array.isArray(rData) ? rData : []);
@@ -57,6 +53,14 @@ export default function ResidentsPage() {
   }
 
   useEffect(() => { loadData(); }, []);
+
+  function toggleUnit(unitId: string) {
+    setForm((f) =>
+      f.unitIds.includes(unitId)
+        ? { ...f, unitIds: f.unitIds.filter((id) => id !== unitId) }
+        : { ...f, unitIds: [...f.unitIds, unitId] }
+    );
+  }
 
   function openAdd() {
     setEditResident(null);
@@ -72,7 +76,7 @@ export default function ResidentsPage() {
       email: r.email,
       phone: r.phone ?? "",
       role: r.role as "resident" | "board" | "admin",
-      unitId: r.unitId ?? "",
+      unitIds: r.units.map((u) => u.id),
     });
     setError("");
     setShowModal(true);
@@ -88,16 +92,12 @@ export default function ResidentsPage() {
       email: form.email,
       phone: form.phone || null,
       role: form.role,
-      unitId: form.unitId || null,
+      unitIds: form.unitIds,
     };
 
     const res = await fetch(
       editResident ? `/api/residents/${editResident.id}` : "/api/residents",
-      {
-        method: editResident ? "PATCH" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      }
+      { method: editResident ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }
     );
 
     const data = await res.json();
@@ -129,10 +129,7 @@ export default function ResidentsPage() {
           <h1 className="text-2xl font-bold text-gray-900">Residents</h1>
           <p className="text-gray-500 text-sm mt-0.5">Manage all residents and board members</p>
         </div>
-        <button
-          onClick={openAdd}
-          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-        >
+        <button onClick={openAdd} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
           + Add resident
         </button>
       </div>
@@ -158,10 +155,7 @@ export default function ResidentsPage() {
         ) : residents.length === 0 ? (
           <div className="p-12 text-center">
             <p className="text-gray-400 text-sm mb-3">No residents yet.</p>
-            <button
-              onClick={openAdd}
-              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-            >
+            <button onClick={openAdd} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
               Add your first resident
             </button>
           </div>
@@ -172,7 +166,7 @@ export default function ResidentsPage() {
                 <th className="text-left px-5 py-3 font-medium text-gray-500">Name</th>
                 <th className="text-left px-5 py-3 font-medium text-gray-500">Email</th>
                 <th className="text-left px-5 py-3 font-medium text-gray-500">Phone</th>
-                <th className="text-left px-5 py-3 font-medium text-gray-500">Unit</th>
+                <th className="text-left px-5 py-3 font-medium text-gray-500">Units</th>
                 <th className="text-left px-5 py-3 font-medium text-gray-500">Role</th>
                 <th className="px-5 py-3"></th>
               </tr>
@@ -184,7 +178,20 @@ export default function ResidentsPage() {
                   <td className="px-5 py-3.5 text-gray-600">{r.email}</td>
                   <td className="px-5 py-3.5 text-gray-600">{r.phone || "—"}</td>
                   <td className="px-5 py-3.5 text-gray-600">
-                    {r.unit ? `#${r.unit.unitNumber}` : <span className="text-gray-300">No unit</span>}
+                    {r.units.length === 0 ? (
+                      <span className="text-gray-300">No unit</span>
+                    ) : (
+                      <div className="flex flex-wrap gap-1">
+                        {r.units
+                          .slice()
+                          .sort((a, b) => parseInt(a.unitNumber) - parseInt(b.unitNumber))
+                          .map((u) => (
+                            <span key={u.id} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                              #{u.unitNumber}
+                            </span>
+                          ))}
+                      </div>
+                    )}
                   </td>
                   <td className="px-5 py-3.5">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${roleBadge[r.role] ?? "bg-gray-100 text-gray-600"}`}>
@@ -192,18 +199,8 @@ export default function ResidentsPage() {
                     </span>
                   </td>
                   <td className="px-5 py-3.5 text-right">
-                    <button
-                      onClick={() => openEdit(r)}
-                      className="text-blue-600 hover:underline text-xs font-medium mr-3"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => setDeleteId(r.id)}
-                      className="text-red-500 hover:underline text-xs font-medium"
-                    >
-                      Delete
-                    </button>
+                    <button onClick={() => openEdit(r)} className="text-blue-600 hover:underline text-xs font-medium mr-3">Edit</button>
+                    <button onClick={() => setDeleteId(r.id)} className="text-red-500 hover:underline text-xs font-medium">Delete</button>
                   </td>
                 </tr>
               ))}
@@ -215,7 +212,7 @@ export default function ResidentsPage() {
       {/* Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <h2 className="text-lg font-bold text-gray-900 mb-5">
               {editResident ? `Edit ${editResident.name}` : "Add resident"}
             </h2>
@@ -252,51 +249,52 @@ export default function ResidentsPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
-                  <select
-                    value={form.unitId}
-                    onChange={(e) => setForm({ ...form, unitId: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">No unit</option>
-                    {units.map((u) => (
-                      <option key={u.id} value={u.id}>#{u.unitNumber}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                  <select
-                    value={form.role}
-                    onChange={(e) => setForm({ ...form, role: e.target.value as "resident" | "board" | "admin" })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="resident">Resident</option>
-                    <option value="board">Board member</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                <select
+                  value={form.role}
+                  onChange={(e) => setForm({ ...form, role: e.target.value as "resident" | "board" | "admin" })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="resident">Resident</option>
+                  <option value="board">Board member</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Units owned</label>
+                {units.length === 0 ? (
+                  <p className="text-sm text-gray-400">No units yet — add units first.</p>
+                ) : (
+                  <div className="grid grid-cols-4 gap-2 max-h-40 overflow-y-auto pr-1">
+                    {units.map((u) => {
+                      const selected = form.unitIds.includes(u.id);
+                      return (
+                        <button
+                          key={u.id}
+                          type="button"
+                          onClick={() => toggleUnit(u.id)}
+                          className={`px-2 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                            selected
+                              ? "bg-blue-600 text-white border-blue-600"
+                              : "bg-white text-gray-700 border-gray-300 hover:border-blue-400"
+                          }`}
+                        >
+                          #{u.unitNumber}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
-              {error && (
-                <p className="text-red-600 text-sm bg-red-50 px-3 py-2 rounded-lg">{error}</p>
-              )}
+              {error && <p className="text-red-600 text-sm bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
 
               <div className="flex gap-3 pt-1">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
-                >
+                <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-                >
+                <button type="submit" disabled={saving} className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50">
                   {saving ? "Saving..." : editResident ? "Save changes" : "Add resident"}
                 </button>
               </div>
@@ -313,22 +311,10 @@ export default function ResidentsPage() {
               <span className="text-red-600 text-xl">🗑️</span>
             </div>
             <h2 className="text-lg font-bold text-gray-900 mb-2">Remove resident?</h2>
-            <p className="text-sm text-gray-500 mb-6">
-              This will remove them from the community. Their payment history will remain.
-            </p>
+            <p className="text-sm text-gray-500 mb-6">This will remove them from the community. Their payment history will remain.</p>
             <div className="flex gap-3">
-              <button
-                onClick={() => setDeleteId(null)}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleDelete(deleteId)}
-                className="flex-1 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700"
-              >
-                Remove
-              </button>
+              <button onClick={() => setDeleteId(null)} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50">Cancel</button>
+              <button onClick={() => handleDelete(deleteId)} className="flex-1 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700">Remove</button>
             </div>
           </div>
         </div>

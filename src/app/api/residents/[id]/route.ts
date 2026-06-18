@@ -8,7 +8,7 @@ const residentSchema = z.object({
   email: z.string().email(),
   phone: z.string().optional().nullable(),
   role: z.enum(["resident", "board", "admin"]),
-  unitId: z.string().optional().nullable(),
+  unitIds: z.array(z.string()).default([]),
 });
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -31,13 +31,6 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (existing) return NextResponse.json({ error: "Email already in use." }, { status: 409 });
   }
 
-  if (data.unitId) {
-    const unit = await db.unit.findFirst({
-      where: { id: data.unitId, communityId: session.user.communityId },
-    });
-    if (!unit) return NextResponse.json({ error: "Unit not found." }, { status: 404 });
-  }
-
   const updated = await db.user.update({
     where: { id },
     data: {
@@ -45,7 +38,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       email: data.email,
       phone: data.phone ?? null,
       role: data.role,
-      unitId: data.unitId ?? null,
+      units: { set: data.unitIds.map((uid) => ({ id: uid })) },
     },
     select: {
       id: true,
@@ -53,9 +46,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       email: true,
       phone: true,
       role: true,
-      unitId: true,
       createdAt: true,
-      unit: { select: { id: true, unitNumber: true } },
+      units: { select: { id: true, unitNumber: true } },
     },
   });
 

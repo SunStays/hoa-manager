@@ -42,7 +42,7 @@ model Unit {
   maintenanceRequests MaintenanceRequest[]
   payments            Payment[]
   community           Community            @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  residents           User[]
+  residents           User[]               @relation("UnitResidents")
 
   @@unique([communityId, unitNumber])
 }
@@ -50,7 +50,6 @@ model Unit {
 model User {
   id                  String               @id @default(cuid())
   communityId         String
-  unitId              String?
   name                String
   email               String               @unique
   password            String?
@@ -69,7 +68,7 @@ model User {
   payments            Payment[]
   sessions            Session[]
   community           Community            @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  unit                Unit?                @relation(fields: [unitId], references: [id])
+  units               Unit[]               @relation("UnitResidents")
   voteResponses       VoteResponse[]
 }
 
