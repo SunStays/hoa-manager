@@ -18,6 +18,7 @@ const emptyForm = {
   phone: "",
   role: "resident" as "resident" | "board" | "admin",
   unitIds: [] as string[],
+  password: "",
 };
 
 const roleLabel: Record<string, string> = {
@@ -77,6 +78,7 @@ export default function ResidentsPage() {
       phone: r.phone ?? "",
       role: r.role as "resident" | "board" | "admin",
       unitIds: r.units.map((u) => u.id),
+      password: "",
     });
     setError("");
     setShowModal(true);
@@ -93,6 +95,7 @@ export default function ResidentsPage() {
       phone: form.phone || null,
       role: form.role,
       unitIds: form.unitIds,
+      ...(form.password ? { password: form.password } : {}),
     };
 
     const res = await fetch(
@@ -297,6 +300,20 @@ export default function ResidentsPage() {
                   <option value="admin">Admin</option>
                 </select>
               </div>
+              {!editResident && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Password <span className="text-gray-400 font-normal">(optional — lets them log in)</span>
+                  </label>
+                  <input
+                    type="password"
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    placeholder="Min. 6 characters"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Units owned</label>
                 {units.length === 0 ? (

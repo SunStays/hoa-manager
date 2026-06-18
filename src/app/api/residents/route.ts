@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { z } from "zod";
+import bcrypt from "bcryptjs";
 
 const residentSchema = z.object({
   name: z.string().min(1),
@@ -9,6 +10,7 @@ const residentSchema = z.object({
   phone: z.string().optional().nullable(),
   role: z.enum(["resident", "board", "admin"]),
   unitIds: z.array(z.string()).default([]),
+  password: z.string().min(6).optional().nullable(),
 });
 
 export async function GET() {
@@ -46,12 +48,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Email already in use." }, { status: 409 });
   }
 
+  const hashedPassword = data.password ? await bcrypt.hash(data.password, 10) : null;
+
   const resident = await db.user.create({
     data: {
       name: data.name,
       email: data.email,
       phone: data.phone ?? null,
       role: data.role,
+      password: hashedPassword,
       communityId: session.user.communityId,
       units: data.unitIds.length > 0 ? { connect: data.unitIds.map((id) => ({ id })) } : undefined,
     },
