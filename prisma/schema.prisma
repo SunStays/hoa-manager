@@ -15,6 +15,9 @@ model Community {
   timezone            String               @default("Europe/Amsterdam")
   dueDayOfMonth       Int                  @default(1)
   logoUrl             String?
+  buildingPmName      String?
+  buildingPmPhone     String?
+  buildingPmEmail     String?
   stripeAccountId     String?
   subscriptionStatus  String               @default("trial")
   createdAt           DateTime             @default(now())

@@ -11,20 +11,34 @@ type Unit = {
   residents: { name: string }[];
 };
 
+type Community = {
+  buildingPmName: string | null;
+  buildingPmPhone: string | null;
+  buildingPmEmail: string | null;
+};
+
 const emptyPm = { pmName: "", pmPhone: "", pmEmail: "" };
+const emptyBuilding = { buildingPmName: "", buildingPmPhone: "", buildingPmEmail: "" };
 
 export default function PropertyManagersPage() {
   const [units, setUnits] = useState<Unit[]>([]);
+  const [community, setCommunity] = useState<Community | null>(null);
   const [loading, setLoading] = useState(true);
   const [editUnit, setEditUnit] = useState<Unit | null>(null);
   const [form, setForm] = useState(emptyPm);
+  const [editBuilding, setEditBuilding] = useState(false);
+  const [buildingForm, setBuildingForm] = useState(emptyBuilding);
   const [saving, setSaving] = useState(false);
+  const [savingBuilding, setSavingBuilding] = useState(false);
   const [error, setError] = useState("");
+  const [buildingError, setBuildingError] = useState("");
 
   async function load() {
-    const res = await fetch("/api/units");
-    const data = await res.json();
-    setUnits(Array.isArray(data) ? data : []);
+    const [uRes, cRes] = await Promise.all([fetch("/api/units"), fetch("/api/community")]);
+    const uData = await uRes.json();
+    const cData = await cRes.json();
+    setUnits(Array.isArray(uData) ? uData : []);
+    setCommunity(cData ?? null);
     setLoading(false);
   }
 
@@ -64,6 +78,26 @@ export default function PropertyManagersPage() {
     load();
   }
 
+  async function handleSaveBuilding(e: React.FormEvent) {
+    e.preventDefault();
+    setSavingBuilding(true);
+    setBuildingError("");
+    const res = await fetch("/api/community", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(buildingForm),
+    });
+    if (!res.ok) {
+      const d = await res.json();
+      setBuildingError(d.error || "Something went wrong.");
+      setSavingBuilding(false);
+      return;
+    }
+    setEditBuilding(false);
+    setSavingBuilding(false);
+    load();
+  }
+
   async function handleClear(unit: Unit) {
     await fetch(`/api/units/${unit.id}/manager`, {
       method: "PATCH",
@@ -87,6 +121,49 @@ export default function PropertyManagersPage() {
         <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>
       ) : (
         <div className="space-y-6">
+          {/* Building-level management company */}
+          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-1">Building Management</p>
+                <p className="text-sm text-blue-800 font-medium mb-1">Supervises the outside of the complex</p>
+                {community?.buildingPmName ? (
+                  <div>
+                    <p className="font-bold text-gray-900">{community.buildingPmName}</p>
+                    <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5">
+                      {community.buildingPmPhone && (
+                        <a href={`tel:${community.buildingPmPhone}`} className="text-sm text-blue-600 hover:underline">
+                          📞 {community.buildingPmPhone}
+                        </a>
+                      )}
+                      {community.buildingPmEmail && (
+                        <a href={`mailto:${community.buildingPmEmail}`} className="text-sm text-blue-600 hover:underline">
+                          ✉️ {community.buildingPmEmail}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-blue-400 italic">Not set yet</p>
+                )}
+              </div>
+              <button
+                onClick={() => {
+                  setBuildingForm({
+                    buildingPmName: community?.buildingPmName ?? "",
+                    buildingPmPhone: community?.buildingPmPhone ?? "",
+                    buildingPmEmail: community?.buildingPmEmail ?? "",
+                  });
+                  setBuildingError("");
+                  setEditBuilding(true);
+                }}
+                className="shrink-0 text-sm font-medium text-blue-600 hover:underline"
+              >
+                {community?.buildingPmName ? "Edit" : "+ Add"}
+              </button>
+            </div>
+          </div>
+
           {/* Summary stats */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white rounded-xl border border-gray-100 p-4">
@@ -158,6 +235,58 @@ export default function PropertyManagersPage() {
               </div>
             </section>
           )}
+        </div>
+      )}
+
+      {/* Building management modal */}
+      {editBuilding && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-1">Building Management Company</h2>
+            <p className="text-sm text-gray-500 mb-5">Supervises the outside of the complex</p>
+            <form onSubmit={handleSaveBuilding} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Company / person name *</label>
+                <input
+                  type="text"
+                  value={buildingForm.buildingPmName}
+                  onChange={(e) => setBuildingForm({ ...buildingForm, buildingPmName: e.target.value })}
+                  required
+                  placeholder="e.g. Las Islas Property Services"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <input
+                  type="tel"
+                  value={buildingForm.buildingPmPhone}
+                  onChange={(e) => setBuildingForm({ ...buildingForm, buildingPmPhone: e.target.value })}
+                  placeholder="+297 700 0000"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={buildingForm.buildingPmEmail}
+                  onChange={(e) => setBuildingForm({ ...buildingForm, buildingPmEmail: e.target.value })}
+                  placeholder="info@lasislaspm.com"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              {buildingError && <p className="text-red-600 text-sm bg-red-50 px-3 py-2 rounded-lg">{buildingError}</p>}
+              <div className="flex gap-3 pt-1">
+                <button type="button" onClick={() => setEditBuilding(false)} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50">
+                  Cancel
+                </button>
+                <button type="submit" disabled={savingBuilding} className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                  {savingBuilding ? "Saving..." : "Save"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
