@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 type Document = {
   id: string;
@@ -51,7 +51,15 @@ export default function DocumentsPage() {
   const [category, setCategory] = useState("other");
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [file, setFile] = useState<File | null>(null);
+  const [dragging, setDragging] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const onDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragging(false);
+    const dropped = e.dataTransfer.files[0];
+    if (dropped) setFile(dropped);
+  }, []);
 
   async function loadDocuments() {
     const res = await fetch("/api/documents");
@@ -272,17 +280,43 @@ export default function DocumentsPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">File *</label>
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="*/*"
-                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                  className="w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                />
-                <p className="text-xs text-gray-400 mt-1">PDF, Word, Excel, PowerPoint, images, screenshots, emails (.eml/.msg), CSV, ZIP — max 10 MB</p>
+                <label className="block text-sm font-medium text-gray-700 mb-2">File *</label>
+                <div
+                  onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                  onDragLeave={() => setDragging(false)}
+                  onDrop={onDrop}
+                  onClick={() => fileRef.current?.click()}
+                  className={`relative flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-8 cursor-pointer transition-colors ${
+                    dragging
+                      ? "border-blue-500 bg-blue-50"
+                      : file
+                      ? "border-green-400 bg-green-50"
+                      : "border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50"
+                  }`}
+                >
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="*/*"
+                    onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                    className="hidden"
+                  />
+                  {file ? (
+                    <>
+                      <span className="text-2xl">✅</span>
+                      <p className="text-sm font-medium text-green-700">{file.name}</p>
+                      <p className="text-xs text-green-600">{formatBytes(file.size)} — click to change</p>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-3xl">📂</span>
+                      <p className="text-sm font-medium text-gray-700">Drag & drop a file here</p>
+                      <p className="text-xs text-gray-400">or click to browse</p>
+                      <p className="text-xs text-gray-300 mt-1">Any file type — max 10 MB</p>
+                    </>
+                  )}
+                </div>
               </div>
-              {file && <div className="bg-gray-50 rounded-lg px-3 py-2 text-xs text-gray-600">{file.name} — {formatBytes(file.size)}</div>}
               {uploadError && <p className="text-red-600 text-sm bg-red-50 px-3 py-2 rounded-lg">{uploadError}</p>}
               <div className="flex gap-3 pt-1">
                 <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
