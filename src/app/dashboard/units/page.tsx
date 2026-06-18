@@ -1,8 +1,351 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { formatCurrency } from "@/lib/utils";
+
+type Unit = {
+  id: string;
+  unitNumber: string;
+  address: string | null;
+  floor: number | null;
+  sqm: number | null;
+  monthlyDues: string;
+  status: string;
+  residents: { id: string; name: string; email: string; role: string }[];
+};
+
+const emptyForm = {
+  unitNumber: "",
+  address: "",
+  floor: "",
+  sqm: "",
+  monthlyDues: "0",
+  status: "occupied" as "occupied" | "vacant",
+};
+
 export default function UnitsPage() {
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [editUnit, setEditUnit] = useState<Unit | null>(null);
+  const [form, setForm] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  async function loadUnits() {
+    const res = await fetch("/api/units");
+    const data = await res.json();
+    setUnits(Array.isArray(data) ? data : []);
+    setLoading(false);
+  }
+
+  useEffect(() => { loadUnits(); }, []);
+
+  function openAdd() {
+    setEditUnit(null);
+    setForm(emptyForm);
+    setError("");
+    setShowModal(true);
+  }
+
+  function openEdit(unit: Unit) {
+    setEditUnit(unit);
+    setForm({
+      unitNumber: unit.unitNumber,
+      address: unit.address ?? "",
+      floor: unit.floor?.toString() ?? "",
+      sqm: unit.sqm?.toString() ?? "",
+      monthlyDues: unit.monthlyDues,
+      status: unit.status as "occupied" | "vacant",
+    });
+    setError("");
+    setShowModal(true);
+  }
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+
+    const payload = {
+      unitNumber: form.unitNumber,
+      address: form.address || undefined,
+      floor: form.floor ? Number(form.floor) : undefined,
+      sqm: form.sqm ? Number(form.sqm) : undefined,
+      monthlyDues: Number(form.monthlyDues),
+      status: form.status,
+    };
+
+    const res = await fetch(editUnit ? `/api/units/${editUnit.id}` : "/api/units", {
+      method: editUnit ? "PATCH" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error || "Something went wrong.");
+      setSaving(false);
+      return;
+    }
+
+    setShowModal(false);
+    loadUnits();
+    setSaving(false);
+  }
+
+  async function handleDelete(id: string) {
+    await fetch(`/api/units/${id}`, { method: "DELETE" });
+    setDeleteId(null);
+    loadUnits();
+  }
+
+  const totalDues = units.reduce((sum, u) => sum + Number(u.monthlyDues), 0);
+  const occupied = units.filter((u) => u.status === "occupied").length;
+  const vacant = units.filter((u) => u.status === "vacant").length;
+
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">Units</h1>
-      <p className="text-gray-500">Manage your HOA units here. Coming soon.</p>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Units</h1>
+          <p className="text-gray-500 text-sm mt-0.5">Manage all units in your community</p>
+        </div>
+        <button
+          onClick={openAdd}
+          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          + Add unit
+        </button>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        {[
+          { label: "Total units", value: units.length },
+          { label: "Occupied", value: occupied },
+          { label: "Vacant", value: vacant },
+        ].map((s) => (
+          <div key={s.label} className="bg-white rounded-xl border border-gray-100 p-4">
+            <p className="text-sm text-gray-500">{s.label}</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">{s.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Table */}
+      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+        {loading ? (
+          <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>
+        ) : units.length === 0 ? (
+          <div className="p-12 text-center">
+            <p className="text-gray-400 text-sm mb-3">No units yet.</p>
+            <button
+              onClick={openAdd}
+              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Add your first unit
+            </button>
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100 bg-gray-50">
+                <th className="text-left px-5 py-3 font-medium text-gray-500">Unit</th>
+                <th className="text-left px-5 py-3 font-medium text-gray-500">Address</th>
+                <th className="text-left px-5 py-3 font-medium text-gray-500">Residents</th>
+                <th className="text-left px-5 py-3 font-medium text-gray-500">Monthly dues</th>
+                <th className="text-left px-5 py-3 font-medium text-gray-500">Status</th>
+                <th className="px-5 py-3"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {units.map((unit) => (
+                <tr key={unit.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                  <td className="px-5 py-3.5 font-semibold text-gray-900">#{unit.unitNumber}</td>
+                  <td className="px-5 py-3.5 text-gray-600">{unit.address || "—"}</td>
+                  <td className="px-5 py-3.5 text-gray-600">
+                    {unit.residents.length === 0 ? (
+                      <span className="text-gray-300">No residents</span>
+                    ) : (
+                      unit.residents.map((r) => r.name).join(", ")
+                    )}
+                  </td>
+                  <td className="px-5 py-3.5 text-gray-900 font-medium">
+                    {formatCurrency(Number(unit.monthlyDues))}
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                      unit.status === "occupied"
+                        ? "bg-green-50 text-green-700"
+                        : "bg-gray-100 text-gray-500"
+                    }`}>
+                      {unit.status === "occupied" ? "Occupied" : "Vacant"}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5 text-right">
+                    <button
+                      onClick={() => openEdit(unit)}
+                      className="text-blue-600 hover:underline text-xs font-medium mr-3"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => setDeleteId(unit.id)}
+                      className="text-red-500 hover:underline text-xs font-medium"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="bg-gray-50 border-t border-gray-100">
+                <td colSpan={3} className="px-5 py-3 text-sm font-medium text-gray-500">
+                  Total monthly dues
+                </td>
+                <td className="px-5 py-3 text-sm font-bold text-gray-900">
+                  {formatCurrency(totalDues)}
+                </td>
+                <td colSpan={2}></td>
+              </tr>
+            </tfoot>
+          </table>
+        )}
+      </div>
+
+      {/* Add/Edit Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-5">
+              {editUnit ? `Edit unit #${editUnit.unitNumber}` : "Add unit"}
+            </h2>
+            <form onSubmit={handleSave} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Unit number *</label>
+                  <input
+                    type="text"
+                    value={form.unitNumber}
+                    onChange={(e) => setForm({ ...form, unitNumber: e.target.value })}
+                    required
+                    placeholder="e.g. 101"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <select
+                    value={form.status}
+                    onChange={(e) => setForm({ ...form, status: e.target.value as "occupied" | "vacant" })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="occupied">Occupied</option>
+                    <option value="vacant">Vacant</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <input
+                  type="text"
+                  value={form.address}
+                  onChange={(e) => setForm({ ...form, address: e.target.value })}
+                  placeholder="e.g. Building A, Floor 2"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Floor</label>
+                  <input
+                    type="number"
+                    value={form.floor}
+                    onChange={(e) => setForm({ ...form, floor: e.target.value })}
+                    placeholder="1"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Size (m²)</label>
+                  <input
+                    type="number"
+                    value={form.sqm}
+                    onChange={(e) => setForm({ ...form, sqm: e.target.value })}
+                    placeholder="80"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Monthly dues ($)</label>
+                  <input
+                    type="number"
+                    value={form.monthlyDues}
+                    onChange={(e) => setForm({ ...form, monthlyDues: e.target.value })}
+                    min="0"
+                    step="0.01"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <p className="text-red-600 text-sm bg-red-50 px-3 py-2 rounded-lg">{error}</p>
+              )}
+
+              <div className="flex gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                >
+                  {saving ? "Saving..." : editUnit ? "Save changes" : "Add unit"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirmation */}
+      {deleteId && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
+            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-red-600 text-xl">🗑️</span>
+            </div>
+            <h2 className="text-lg font-bold text-gray-900 mb-2">Delete unit?</h2>
+            <p className="text-sm text-gray-500 mb-6">
+              This will also remove all linked payments and maintenance requests.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteId(null)}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(deleteId)}
+                className="flex-1 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
