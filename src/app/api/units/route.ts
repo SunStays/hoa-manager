@@ -21,9 +21,10 @@ export async function GET() {
     include: {
       residents: { select: { id: true, name: true, email: true, role: true } },
     },
-    orderBy: { unitNumber: "asc" },
+    orderBy: { createdAt: "asc" },
   });
 
+  units.sort((a, b) => parseInt(a.unitNumber) - parseInt(b.unitNumber));
   return NextResponse.json(units);
 }
 
