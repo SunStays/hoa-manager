@@ -18,6 +18,8 @@ const FOLDERS = [
   { value: "insurance", label: "Insurance", icon: "🛡️", color: "bg-blue-50 border-blue-200 text-blue-700" },
   { value: "maintenance", label: "Maintenance", icon: "🔧", color: "bg-red-50 border-red-200 text-red-700" },
   { value: "agm", label: "Annual General Meeting", icon: "📋", color: "bg-green-50 border-green-200 text-green-700" },
+  { value: "legal", label: "Legal", icon: "⚖️", color: "bg-purple-50 border-purple-200 text-purple-700" },
+  { value: "projects", label: "Projects", icon: "🏗️", color: "bg-orange-50 border-orange-200 text-orange-700" },
   { value: "other", label: "Other", icon: "📁", color: "bg-gray-50 border-gray-200 text-gray-600" },
 ];
 
