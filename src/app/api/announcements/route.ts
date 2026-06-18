@@ -1,14 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { z } from "zod";
+import { put } from "@vercel/blob";
 import { sendAnnouncementEmails } from "@/lib/email";
-
-const schema = z.object({
-  title: z.string().min(1),
-  body: z.string().min(1),
-  pinned: z.boolean().default(false),
-});
 
 export async function GET() {
   const session = await auth();
@@ -27,20 +21,35 @@ export async function POST(req: Request) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = await req.json();
-  const parsed = schema.safeParse(body);
-  if (!parsed.success) return NextResponse.json({ error: "Invalid data." }, { status: 400 });
+  const formData = await req.formData();
+  const title = formData.get("title") as string;
+  const body = formData.get("body") as string;
+  const pinned = formData.get("pinned") === "true";
+  const files = formData.getAll("files") as File[];
+
+  if (!title || !body) return NextResponse.json({ error: "Invalid data." }, { status: 400 });
+
+  // Upload attachments to Vercel Blob
+  const attachmentUrls: string[] = [];
+  for (const file of files) {
+    if (file.size > 0) {
+      const blob = await put(`hoa/${session.user.communityId}/announcements/${Date.now()}-${file.name}`, file, { access: "public" });
+      attachmentUrls.push(blob.url);
+    }
+  }
 
   const announcement = await db.announcement.create({
     data: {
-      ...parsed.data,
+      title,
+      body,
+      pinned,
+      attachments: attachmentUrls,
       communityId: session.user.communityId,
       authorId: session.user.id,
     },
     include: { author: { select: { name: true, role: true } } },
   });
 
-  // Send email to all residents in the community
   const community = await db.community.findUnique({
     where: { id: session.user.communityId },
     select: { name: true },
@@ -55,9 +64,10 @@ export async function POST(req: Request) {
     await sendAnnouncementEmails({
       communityName: community.name,
       authorName: announcement.author.name,
-      title: parsed.data.title,
-      body: parsed.data.body,
+      title,
+      body,
       recipients: residents,
+      attachmentUrls,
     }).catch(console.error);
   }
 

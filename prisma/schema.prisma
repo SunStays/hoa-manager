@@ -41,6 +41,7 @@ model Unit {
   updatedAt           DateTime             @updatedAt
   maintenanceRequests MaintenanceRequest[]
   payments            Payment[]
+  voteResponses       VoteResponse[]
   community           Community            @relation(fields: [communityId], references: [id], onDelete: Cascade)
   residents           User[]               @relation("UnitResidents")
 
@@ -139,6 +140,7 @@ model Announcement {
   title       String
   body        String
   pinned      Boolean   @default(false)
+  attachments String[]
   publishedAt DateTime  @default(now())
   createdAt   DateTime  @default(now())
   author      User      @relation(fields: [authorId], references: [id])
@@ -161,12 +163,14 @@ model VoteResponse {
   id        String   @id @default(cuid())
   voteId    String
   userId    String
+  unitId    String
   option    String
   createdAt DateTime @default(now())
+  unit      Unit     @relation(fields: [unitId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
   vote      Vote     @relation(fields: [voteId], references: [id], onDelete: Cascade)
 
-  @@unique([voteId, userId])
+  @@unique([voteId, unitId])
 }
 
 model Amenity {
