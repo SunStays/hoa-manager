@@ -24,6 +24,8 @@ export async function POST(req: Request) {
   const file = formData.get("file") as File | null;
   const title = formData.get("title") as string;
   const category = formData.get("category") as string;
+  const yearRaw = formData.get("year") as string | null;
+  const year = yearRaw ? parseInt(yearRaw) : null;
 
   if (!file || !title || !category) {
     return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
@@ -39,6 +41,7 @@ export async function POST(req: Request) {
       uploadedById: session.user.id,
       title,
       category,
+      year,
       fileUrl: blob.url,
       fileSize: file.size,
       mimeType: file.type,

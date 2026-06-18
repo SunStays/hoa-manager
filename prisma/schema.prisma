@@ -201,6 +201,7 @@ model Document {
   uploadedById String
   title        String
   category     String    @default("other")
+  year         Int?
   fileUrl      String
   fileSize     Int?
   mimeType     String?
