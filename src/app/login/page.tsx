@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const justRegistered = searchParams.get("registered") === "1";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -41,6 +43,12 @@ export default function LoginPage() {
           <h1 className="text-2xl font-bold text-gray-900">Sign in</h1>
           <p className="text-gray-500 mt-1 text-sm">HOA Manager</p>
         </div>
+
+        {justRegistered && (
+          <div className="mb-4 text-sm bg-green-50 text-green-700 px-3 py-2 rounded-lg text-center">
+            HOA created! Sign in with your new account.
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
