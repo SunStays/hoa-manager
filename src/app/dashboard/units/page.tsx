@@ -135,87 +135,99 @@ export default function UnitsPage() {
         ))}
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-        {loading ? (
-          <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>
-        ) : units.length === 0 ? (
-          <div className="p-12 text-center">
-            <p className="text-gray-400 text-sm mb-3">No units yet.</p>
-            <button
-              onClick={openAdd}
-              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Add your first unit
-            </button>
+      {loading ? (
+        <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>
+      ) : units.length === 0 ? (
+        <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
+          <p className="text-gray-400 text-sm mb-3">No units yet.</p>
+          <button onClick={openAdd} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+            Add your first unit
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* Mobile cards */}
+          <div className="md:hidden space-y-3">
+            {units.map((unit) => (
+              <div key={unit.id} className="bg-white rounded-xl border border-gray-100 p-4">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div>
+                    <p className="font-bold text-gray-900 text-base">Unit #{unit.unitNumber}</p>
+                    {unit.address && <p className="text-sm text-gray-500">{unit.address}</p>}
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      {unit.residents.length === 0 ? "No residents" : unit.residents.map((r) => r.name).join(", ")}
+                    </p>
+                  </div>
+                  <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                    unit.status === "occupied" ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-500"
+                  }`}>
+                    {unit.status === "occupied" ? "Occupied" : "Vacant"}
+                  </span>
+                </div>
+                <p className="text-sm font-semibold text-gray-900 mb-3">{formatCurrency(Number(unit.monthlyDues))} / month</p>
+                <div className="flex gap-2 pt-1 border-t border-gray-50">
+                  <button onClick={() => openEdit(unit)} className="flex-1 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">Edit</button>
+                  <button onClick={() => setDeleteId(unit.id)} className="flex-1 py-1.5 text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg transition-colors">Delete</button>
+                </div>
+              </div>
+            ))}
+            <div className="bg-gray-50 rounded-xl border border-gray-100 px-4 py-3 flex justify-between items-center">
+              <span className="text-sm font-medium text-gray-500">Total monthly dues</span>
+              <span className="text-sm font-bold text-gray-900">{formatCurrency(totalDues)}</span>
+            </div>
           </div>
-        ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50">
-                <th className="text-left px-5 py-3 font-medium text-gray-500">Unit</th>
-                <th className="text-left px-5 py-3 font-medium text-gray-500">Address</th>
-                <th className="text-left px-5 py-3 font-medium text-gray-500">Residents</th>
-                <th className="text-left px-5 py-3 font-medium text-gray-500">Monthly dues</th>
-                <th className="text-left px-5 py-3 font-medium text-gray-500">Status</th>
-                <th className="px-5 py-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {units.map((unit) => (
-                <tr key={unit.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                  <td className="px-5 py-3.5 font-semibold text-gray-900">#{unit.unitNumber}</td>
-                  <td className="px-5 py-3.5 text-gray-600">{unit.address || "—"}</td>
-                  <td className="px-5 py-3.5 text-gray-600">
-                    {unit.residents.length === 0 ? (
-                      <span className="text-gray-300">No residents</span>
-                    ) : (
-                      unit.residents.map((r) => r.name).join(", ")
-                    )}
-                  </td>
-                  <td className="px-5 py-3.5 text-gray-900 font-medium">
-                    {formatCurrency(Number(unit.monthlyDues))}
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                      unit.status === "occupied"
-                        ? "bg-green-50 text-green-700"
-                        : "bg-gray-100 text-gray-500"
-                    }`}>
-                      {unit.status === "occupied" ? "Occupied" : "Vacant"}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3.5 text-right">
-                    <button
-                      onClick={() => openEdit(unit)}
-                      className="text-blue-600 hover:underline text-xs font-medium mr-3"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => setDeleteId(unit.id)}
-                      className="text-red-500 hover:underline text-xs font-medium"
-                    >
-                      Delete
-                    </button>
-                  </td>
+
+          {/* Desktop table */}
+          <div className="hidden md:block bg-white rounded-xl border border-gray-100 overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50">
+                  <th className="text-left px-5 py-3 font-medium text-gray-500">Unit</th>
+                  <th className="text-left px-5 py-3 font-medium text-gray-500">Address</th>
+                  <th className="text-left px-5 py-3 font-medium text-gray-500">Residents</th>
+                  <th className="text-left px-5 py-3 font-medium text-gray-500">Monthly dues</th>
+                  <th className="text-left px-5 py-3 font-medium text-gray-500">Status</th>
+                  <th className="px-5 py-3"></th>
                 </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="bg-gray-50 border-t border-gray-100">
-                <td colSpan={3} className="px-5 py-3 text-sm font-medium text-gray-500">
-                  Total monthly dues
-                </td>
-                <td className="px-5 py-3 text-sm font-bold text-gray-900">
-                  {formatCurrency(totalDues)}
-                </td>
-                <td colSpan={2}></td>
-              </tr>
-            </tfoot>
-          </table>
-        )}
-      </div>
+              </thead>
+              <tbody>
+                {units.map((unit) => (
+                  <tr key={unit.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                    <td className="px-5 py-3.5 font-semibold text-gray-900">#{unit.unitNumber}</td>
+                    <td className="px-5 py-3.5 text-gray-600">{unit.address || "—"}</td>
+                    <td className="px-5 py-3.5 text-gray-600">
+                      {unit.residents.length === 0 ? (
+                        <span className="text-gray-300">No residents</span>
+                      ) : (
+                        unit.residents.map((r) => r.name).join(", ")
+                      )}
+                    </td>
+                    <td className="px-5 py-3.5 text-gray-900 font-medium">{formatCurrency(Number(unit.monthlyDues))}</td>
+                    <td className="px-5 py-3.5">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                        unit.status === "occupied" ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-500"
+                      }`}>
+                        {unit.status === "occupied" ? "Occupied" : "Vacant"}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5 text-right">
+                      <button onClick={() => openEdit(unit)} className="text-blue-600 hover:underline text-xs font-medium mr-3">Edit</button>
+                      <button onClick={() => setDeleteId(unit.id)} className="text-red-500 hover:underline text-xs font-medium">Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="bg-gray-50 border-t border-gray-100">
+                  <td colSpan={3} className="px-5 py-3 text-sm font-medium text-gray-500">Total monthly dues</td>
+                  <td className="px-5 py-3 text-sm font-bold text-gray-900">{formatCurrency(totalDues)}</td>
+                  <td colSpan={2}></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </>
+      )}
 
       {/* Add/Edit Modal */}
       {showModal && (

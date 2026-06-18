@@ -148,66 +148,102 @@ export default function ResidentsPage() {
         ))}
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-        {loading ? (
-          <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>
-        ) : residents.length === 0 ? (
-          <div className="p-12 text-center">
-            <p className="text-gray-400 text-sm mb-3">No residents yet.</p>
-            <button onClick={openAdd} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
-              Add your first resident
-            </button>
+      {loading ? (
+        <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>
+      ) : residents.length === 0 ? (
+        <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
+          <p className="text-gray-400 text-sm mb-3">No residents yet.</p>
+          <button onClick={openAdd} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+            Add your first resident
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* Mobile cards */}
+          <div className="md:hidden space-y-3">
+            {residents.map((r) => (
+              <div key={r.id} className="bg-white rounded-xl border border-gray-100 p-4">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div>
+                    <p className="font-semibold text-gray-900">{r.name}</p>
+                    <p className="text-sm text-gray-500">{r.email}</p>
+                    {r.phone && <p className="text-sm text-gray-500">{r.phone}</p>}
+                  </div>
+                  <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${roleBadge[r.role] ?? "bg-gray-100 text-gray-600"}`}>
+                    {roleLabel[r.role] ?? r.role}
+                  </span>
+                </div>
+                {r.units.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {r.units
+                      .slice()
+                      .sort((a, b) => parseInt(a.unitNumber) - parseInt(b.unitNumber))
+                      .map((u) => (
+                        <span key={u.id} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                          #{u.unitNumber}
+                        </span>
+                      ))}
+                  </div>
+                )}
+                <div className="flex gap-2 pt-1 border-t border-gray-50">
+                  <button onClick={() => openEdit(r)} className="flex-1 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">Edit</button>
+                  <button onClick={() => setDeleteId(r.id)} className="flex-1 py-1.5 text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg transition-colors">Delete</button>
+                </div>
+              </div>
+            ))}
           </div>
-        ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50">
-                <th className="text-left px-5 py-3 font-medium text-gray-500">Name</th>
-                <th className="text-left px-5 py-3 font-medium text-gray-500">Email</th>
-                <th className="text-left px-5 py-3 font-medium text-gray-500">Phone</th>
-                <th className="text-left px-5 py-3 font-medium text-gray-500">Units</th>
-                <th className="text-left px-5 py-3 font-medium text-gray-500">Role</th>
-                <th className="px-5 py-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {residents.map((r) => (
-                <tr key={r.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                  <td className="px-5 py-3.5 font-semibold text-gray-900">{r.name}</td>
-                  <td className="px-5 py-3.5 text-gray-600">{r.email}</td>
-                  <td className="px-5 py-3.5 text-gray-600">{r.phone || "—"}</td>
-                  <td className="px-5 py-3.5 text-gray-600">
-                    {r.units.length === 0 ? (
-                      <span className="text-gray-300">No unit</span>
-                    ) : (
-                      <div className="flex flex-wrap gap-1">
-                        {r.units
-                          .slice()
-                          .sort((a, b) => parseInt(a.unitNumber) - parseInt(b.unitNumber))
-                          .map((u) => (
-                            <span key={u.id} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
-                              #{u.unitNumber}
-                            </span>
-                          ))}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${roleBadge[r.role] ?? "bg-gray-100 text-gray-600"}`}>
-                      {roleLabel[r.role] ?? r.role}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3.5 text-right">
-                    <button onClick={() => openEdit(r)} className="text-blue-600 hover:underline text-xs font-medium mr-3">Edit</button>
-                    <button onClick={() => setDeleteId(r.id)} className="text-red-500 hover:underline text-xs font-medium">Delete</button>
-                  </td>
+
+          {/* Desktop table */}
+          <div className="hidden md:block bg-white rounded-xl border border-gray-100 overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50">
+                  <th className="text-left px-5 py-3 font-medium text-gray-500">Name</th>
+                  <th className="text-left px-5 py-3 font-medium text-gray-500">Email</th>
+                  <th className="text-left px-5 py-3 font-medium text-gray-500">Phone</th>
+                  <th className="text-left px-5 py-3 font-medium text-gray-500">Units</th>
+                  <th className="text-left px-5 py-3 font-medium text-gray-500">Role</th>
+                  <th className="px-5 py-3"></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+              </thead>
+              <tbody>
+                {residents.map((r) => (
+                  <tr key={r.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                    <td className="px-5 py-3.5 font-semibold text-gray-900">{r.name}</td>
+                    <td className="px-5 py-3.5 text-gray-600">{r.email}</td>
+                    <td className="px-5 py-3.5 text-gray-600">{r.phone || "—"}</td>
+                    <td className="px-5 py-3.5 text-gray-600">
+                      {r.units.length === 0 ? (
+                        <span className="text-gray-300">No unit</span>
+                      ) : (
+                        <div className="flex flex-wrap gap-1">
+                          {r.units
+                            .slice()
+                            .sort((a, b) => parseInt(a.unitNumber) - parseInt(b.unitNumber))
+                            .map((u) => (
+                              <span key={u.id} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                                #{u.unitNumber}
+                              </span>
+                            ))}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${roleBadge[r.role] ?? "bg-gray-100 text-gray-600"}`}>
+                        {roleLabel[r.role] ?? r.role}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5 text-right">
+                      <button onClick={() => openEdit(r)} className="text-blue-600 hover:underline text-xs font-medium mr-3">Edit</button>
+                      <button onClick={() => setDeleteId(r.id)} className="text-red-500 hover:underline text-xs font-medium">Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
 
       {/* Add/Edit Modal */}
       {showModal && (
