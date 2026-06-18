@@ -17,7 +17,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const { id } = await params;
   const body = await req.json();
-  const data = residentSchema.parse(body);
+  const parsed = residentSchema.safeParse(body);
+  if (!parsed.success) return NextResponse.json({ error: "Invalid data." }, { status: 400 });
+  const data = parsed.data;
 
   const user = await db.user.findFirst({
     where: { id, communityId: session.user.communityId },

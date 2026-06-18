@@ -38,7 +38,9 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const data = residentSchema.parse(body);
+  const parsed = residentSchema.safeParse(body);
+  if (!parsed.success) return NextResponse.json({ error: "Invalid data." }, { status: 400 });
+  const data = parsed.data;
 
   const existing = await db.user.findUnique({ where: { email: data.email } });
   if (existing) {
