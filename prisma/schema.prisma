@@ -4,77 +4,73 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Community {
-  id                 String   @id @default(cuid())
-  name               String
-  address            String
-  city               String
-  country            String   @default("Netherlands")
-  timezone           String   @default("Europe/Amsterdam")
-  dueDayOfMonth      Int      @default(1)
-  logoUrl            String?
-  stripeAccountId    String?
-  subscriptionStatus String   @default("trial")
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-
-  units               Unit[]
-  users               User[]
-  announcements       Announcement[]
-  votes               Vote[]
+  id                  String               @id @default(cuid())
+  name                String
+  address             String
+  city                String
+  country             String               @default("Netherlands")
+  timezone            String               @default("Europe/Amsterdam")
+  dueDayOfMonth       Int                  @default(1)
+  logoUrl             String?
+  stripeAccountId     String?
+  subscriptionStatus  String               @default("trial")
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
   amenities           Amenity[]
+  announcements       Announcement[]
   documents           Document[]
   maintenanceRequests MaintenanceRequest[]
+  units               Unit[]
+  users               User[]
+  votes               Vote[]
 }
 
 model Unit {
-  id          String   @id @default(cuid())
-  communityId String
-  unitNumber  String
-  address     String?
-  floor       Int?
-  sqm         Int?
-  monthlyDues Decimal  @default(0)
-  status      String   @default("occupied")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
+  id                  String               @id @default(cuid())
+  communityId         String
+  unitNumber          String
+  address             String?
+  floor               Int?
+  sqm                 Int?
+  monthlyDues         Decimal              @default(0)
+  status              String               @default("occupied")
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  maintenanceRequests MaintenanceRequest[]
+  payments            Payment[]
   community           Community            @relation(fields: [communityId], references: [id], onDelete: Cascade)
   residents           User[]
-  payments            Payment[]
-  maintenanceRequests MaintenanceRequest[]
 
   @@unique([communityId, unitNumber])
 }
 
 model User {
-  id            String    @id @default(cuid())
-  communityId   String
-  unitId        String?
-  name          String
-  email         String    @unique
-  password      String?
-  role          String    @default("resident")
-  phone         String?
-  pushToken     String?
-  avatarUrl     String?
-  emailVerified DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
+  id                  String               @id @default(cuid())
+  communityId         String
+  unitId              String?
+  name                String
+  email               String               @unique
+  password            String?
+  role                String               @default("resident")
+  phone               String?
+  pushToken           String?
+  avatarUrl           String?
+  emailVerified       DateTime?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  accounts            Account[]
+  amenityBookings     AmenityBooking[]
+  announcements       Announcement[]
+  uploadedDocuments   Document[]
+  maintenanceRequests MaintenanceRequest[]
+  payments            Payment[]
+  sessions            Session[]
   community           Community            @relation(fields: [communityId], references: [id], onDelete: Cascade)
   unit                Unit?                @relation(fields: [unitId], references: [id])
-  payments            Payment[]
-  maintenanceRequests MaintenanceRequest[]
   voteResponses       VoteResponse[]
-  amenityBookings     AmenityBooking[]
-  uploadedDocuments   Document[]
-  announcements       Announcement[]
-  sessions            Session[]
-  accounts            Account[]
 }
 
 model Account {
@@ -90,8 +86,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -115,9 +110,8 @@ model Payment {
   stripePaymentId String?
   status          String    @default("pending")
   createdAt       DateTime  @default(now())
-
-  unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id])
+  unit            Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  user            User      @relation(fields: [userId], references: [id])
 }
 
 model MaintenanceRequest {
@@ -134,37 +128,34 @@ model MaintenanceRequest {
   resolvedAt    DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-
-  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  unit        Unit      @relation(fields: [unitId], references: [id])
-  submittedBy User      @relation(fields: [submittedById], references: [id])
+  community     Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  submittedBy   User      @relation(fields: [submittedById], references: [id])
+  unit          Unit      @relation(fields: [unitId], references: [id])
 }
 
 model Announcement {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   communityId String
   authorId    String
   title       String
   body        String
-  pinned      Boolean  @default(false)
-  publishedAt DateTime @default(now())
-  createdAt   DateTime @default(now())
-
-  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  author    User      @relation(fields: [authorId], references: [id])
+  pinned      Boolean   @default(false)
+  publishedAt DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  author      User      @relation(fields: [authorId], references: [id])
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
 }
 
 model Vote {
-  id          String   @id @default(cuid())
+  id          String         @id @default(cuid())
   communityId String
   question    String
   description String?
   options     String[]
   closesAt    DateTime
-  createdAt   DateTime @default(now())
-
-  community Community      @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  responses VoteResponse[]
+  createdAt   DateTime       @default(now())
+  community   Community      @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  responses   VoteResponse[]
 }
 
 model VoteResponse {
@@ -173,24 +164,22 @@ model VoteResponse {
   userId    String
   option    String
   createdAt DateTime @default(now())
-
-  vote Vote @relation(fields: [voteId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  vote      Vote     @relation(fields: [voteId], references: [id], onDelete: Cascade)
 
   @@unique([voteId, userId])
 }
 
 model Amenity {
-  id               String   @id @default(cuid())
+  id               String           @id @default(cuid())
   communityId      String
   name             String
   description      String?
-  maxGuests        Int      @default(10)
-  requiresApproval Boolean  @default(true)
-  createdAt        DateTime @default(now())
-
-  community Community       @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  bookings  AmenityBooking[]
+  maxGuests        Int              @default(10)
+  requiresApproval Boolean          @default(true)
+  createdAt        DateTime         @default(now())
+  community        Community        @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  bookings         AmenityBooking[]
 }
 
 model AmenityBooking {
@@ -203,22 +192,20 @@ model AmenityBooking {
   notes      String?
   status     String   @default("pending")
   createdAt  DateTime @default(now())
-
-  amenity Amenity @relation(fields: [amenityId], references: [id], onDelete: Cascade)
-  user    User    @relation(fields: [userId], references: [id])
+  amenity    Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id])
 }
 
 model Document {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   communityId  String
   uploadedById String
   title        String
-  category     String   @default("other")
+  category     String    @default("other")
   fileUrl      String
   fileSize     Int?
   mimeType     String?
-  createdAt    DateTime @default(now())
-
-  community  Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  uploadedBy User      @relation(fields: [uploadedById], references: [id])
+  createdAt    DateTime  @default(now())
+  community    Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  uploadedBy   User      @relation(fields: [uploadedById], references: [id])
 }
