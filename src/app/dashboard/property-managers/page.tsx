@@ -110,11 +110,46 @@ export default function PropertyManagersPage() {
   const withManager = units.filter((u) => u.pmName);
   const withoutManager = units.filter((u) => !u.pmName);
 
+  function exportCSV() {
+    const rows: string[][] = [["Type", "Unit #", "Residents", "PM Name", "PM Phone", "PM Email"]];
+    if (community?.buildingPmName) {
+      rows.push(["Building", "", "", community.buildingPmName, community.buildingPmPhone ?? "", community.buildingPmEmail ?? ""]);
+    }
+    for (const u of units) {
+      rows.push([
+        "Unit",
+        u.unitNumber,
+        u.residents.map((r) => r.name).join("; "),
+        u.pmName ?? "",
+        u.pmPhone ?? "",
+        u.pmEmail ?? "",
+      ]);
+    }
+    const csv = rows.map((r) => r.map((v) => `"${v.replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "property-managers.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Property Managers</h1>
-        <p className="text-gray-500 text-sm mt-0.5">Property manager per apartment</p>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Property Managers</h1>
+          <p className="text-gray-500 text-sm mt-0.5">Property manager per apartment</p>
+        </div>
+        {!loading && (
+          <button
+            onClick={exportCSV}
+            className="shrink-0 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            Export CSV
+          </button>
+        )}
       </div>
 
       {loading ? (
