@@ -78,7 +78,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   return (
     <>
       {/* Desktop sidebar — always visible on lg+ */}
-      <aside className="hidden lg:flex w-60 bg-white border-r border-gray-100 flex-col h-screen sticky top-0 shrink-0">
+      <aside className="hidden lg:flex w-72 bg-white border-r border-gray-100 flex-col h-screen sticky top-0 shrink-0">
         {navContent}
       </aside>
 
