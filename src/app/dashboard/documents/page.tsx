@@ -52,7 +52,6 @@ export default function DocumentsPage() {
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
-  const [zipping, setZipping] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const onDrop = useCallback((e: React.DragEvent) => {
@@ -119,55 +118,13 @@ export default function DocumentsPage() {
     return <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>;
   }
 
-  async function downloadAll() {
-    setZipping(true);
-    const JSZip = (await import("jszip")).default;
-    const zip = new JSZip();
-
-    await Promise.all(
-      documents.map(async (doc) => {
-        try {
-          const res = await fetch(`/api/documents/${doc.id}/download`);
-          const blob = await res.blob();
-          const folderLabel = FOLDERS.find((f) => f.value === doc.category)?.label ?? doc.category;
-          const yearPart = doc.year ? String(doc.year) : "No Year";
-          const ext = doc.fileUrl.split(".").pop()?.split("?")[0] ?? "";
-          const filename = `${doc.title.replace(/[/\\?%*:|"<>]/g, "-")}${ext ? `.${ext}` : ""}`;
-          zip.folder(folderLabel)?.folder(yearPart)?.file(filename, blob);
-        } catch {
-          // skip files that fail to fetch
-        }
-      })
-    );
-
-    const content = await zip.generateAsync({ type: "blob" });
-    const url = URL.createObjectURL(content);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "documents.zip";
-    a.click();
-    URL.revokeObjectURL(url);
-    setZipping(false);
-  }
-
-  /* ── Level 1: Folder grid ── */
+/* ── Level 1: Folder grid ── */
   if (!currentFolder) {
     return (
       <div>
-        <div className="flex items-start justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Documents</h1>
-            <p className="text-gray-500 text-sm mt-0.5">Manage community documents by folder and year</p>
-          </div>
-          {documents.length > 0 && (
-            <button
-              onClick={downloadAll}
-              disabled={zipping}
-              className="shrink-0 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-            >
-              {zipping ? "Preparing ZIP…" : "⬇ Download All"}
-            </button>
-          )}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Documents</h1>
+          <p className="text-gray-500 text-sm mt-0.5">Manage community documents by folder and year</p>
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {FOLDERS.map((f) => {
