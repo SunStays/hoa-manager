@@ -70,10 +70,11 @@ model User {
   updatedAt           DateTime             @updatedAt
   accounts            Account[]
   amenityBookings     AmenityBooking[]
-  announcements       Announcement[]
-  uploadedDocuments   Document[]
-  maintenanceRequests MaintenanceRequest[]
-  payments            Payment[]
+  announcements        Announcement[]
+  uploadedDocuments    Document[]
+  maintenanceRequests  MaintenanceRequest[]
+  maintenanceUpdates   MaintenanceUpdate[]
+  payments             Payment[]
   sessions            Session[]
   community           Community            @relation(fields: [communityId], references: [id], onDelete: Cascade)
   units               Unit[]               @relation("UnitResidents")
@@ -122,36 +123,51 @@ model Payment {
 }
 
 model MaintenanceRequest {
-  id            String    @id @default(cuid())
+  id            String              @id @default(cuid())
   communityId   String
   unitId        String
   submittedById String
   title         String
   description   String
-  priority      String    @default("medium")
-  status        String    @default("open")
+  priority      String              @default("medium")
+  status        String              @default("open")
   photos        String[]
   notes         String?
   resolvedAt    DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  community     Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  submittedBy   User      @relation(fields: [submittedById], references: [id])
-  unit          Unit      @relation(fields: [unitId], references: [id])
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  community     Community           @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  submittedBy   User                @relation(fields: [submittedById], references: [id])
+  unit          Unit                @relation(fields: [unitId], references: [id])
+  updates       MaintenanceUpdate[]
+  announcements Announcement[]
+}
+
+model MaintenanceUpdate {
+  id        String             @id @default(cuid())
+  requestId String
+  authorId  String
+  message   String
+  status    String?
+  createdAt DateTime           @default(now())
+  request   MaintenanceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  author    User               @relation(fields: [authorId], references: [id])
 }
 
 model Announcement {
-  id          String    @id @default(cuid())
-  communityId String
-  authorId    String
-  title       String
-  body        String
-  pinned      Boolean   @default(false)
-  attachments String[]
-  publishedAt DateTime  @default(now())
-  createdAt   DateTime  @default(now())
-  author      User      @relation(fields: [authorId], references: [id])
-  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  id                   String              @id @default(cuid())
+  communityId          String
+  authorId             String
+  title                String
+  body                 String
+  pinned               Boolean             @default(false)
+  attachments          String[]
+  maintenanceRequestId String?
+  publishedAt          DateTime            @default(now())
+  createdAt            DateTime            @default(now())
+  author               User                @relation(fields: [authorId], references: [id])
+  community            Community           @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  maintenanceRequest   MaintenanceRequest? @relation(fields: [maintenanceRequestId], references: [id], onDelete: SetNull)
 }
 
 model Vote {
