@@ -52,6 +52,7 @@ export default function DocumentsPage() {
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [zipping, setZipping] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const onDrop = useCallback((e: React.DragEvent) => {
@@ -117,8 +118,6 @@ export default function DocumentsPage() {
   if (loading) {
     return <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>;
   }
-
-  const [zipping, setZipping] = useState(false);
 
   async function downloadAll() {
     setZipping(true);
