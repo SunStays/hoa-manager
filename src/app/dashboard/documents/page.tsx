@@ -118,13 +118,47 @@ export default function DocumentsPage() {
     return <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>;
   }
 
+  function exportCSV() {
+    const rows = [["Title", "Folder", "Year", "Size", "Uploaded By", "Date", "URL"]];
+    for (const doc of documents) {
+      const folder = FOLDERS.find((f) => f.value === doc.category)?.label ?? doc.category;
+      rows.push([
+        doc.title,
+        folder,
+        doc.year ? String(doc.year) : "",
+        formatBytes(doc.fileSize),
+        doc.uploadedBy.name,
+        formatDate(doc.createdAt),
+        doc.fileUrl,
+      ]);
+    }
+    const csv = rows.map((r) => r.map((v) => `"${v.replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "documents.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   /* ── Level 1: Folder grid ── */
   if (!currentFolder) {
     return (
       <div>
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Documents</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Manage community documents by folder and year</p>
+        <div className="flex items-start justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Documents</h1>
+            <p className="text-gray-500 text-sm mt-0.5">Manage community documents by folder and year</p>
+          </div>
+          {documents.length > 0 && (
+            <button
+              onClick={exportCSV}
+              className="shrink-0 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              Export CSV
+            </button>
+          )}
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {FOLDERS.map((f) => {
