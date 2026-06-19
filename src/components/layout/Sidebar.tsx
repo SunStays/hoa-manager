@@ -8,6 +8,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: "⊞" },
   { name: "Units", href: "/dashboard/units", icon: "🏠" },
   { name: "Residents", href: "/dashboard/residents", icon: "👥" },
+  { name: "Important Codes", href: "/dashboard/codes", icon: "🔑" },
 { name: "Maintenance", href: "/dashboard/maintenance", icon: "🔧" },
   { name: "Announcements", href: "/dashboard/announcements", icon: "📣" },
   { name: "Documents", href: "/dashboard/documents", icon: "📁" },
