@@ -9,7 +9,7 @@ const navigation = [
   { name: "Units", href: "/dashboard/units", icon: "🏠" },
   { name: "Residents", href: "/dashboard/residents", icon: "👥" },
   { name: "Codes & Numbers", href: "/dashboard/codes", icon: "🔑" },
-{ name: "Maintenance", href: "/dashboard/maintenance", icon: "🔧" },
+  { name: "Maintenance/Request", href: "/dashboard/maintenance", icon: "🔧" },
   { name: "Announcements", href: "/dashboard/announcements", icon: "📣" },
   { name: "Documents", href: "/dashboard/documents", icon: "📁" },
   { name: "Votes", href: "/dashboard/votes", icon: "🗳️" },
