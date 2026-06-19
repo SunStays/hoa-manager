@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import JSZip from "jszip";
 
 type Document = {
   id: string;
@@ -123,6 +122,7 @@ export default function DocumentsPage() {
 
   async function downloadAll() {
     setZipping(true);
+    const JSZip = (await import("jszip")).default;
     const zip = new JSZip();
 
     await Promise.all(
