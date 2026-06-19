@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import JSZip from "jszip";
 
 type Document = {
   id: string;
@@ -118,28 +119,36 @@ export default function DocumentsPage() {
     return <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>;
   }
 
-  function exportCSV() {
-    const rows = [["Title", "Folder", "Year", "Size", "Uploaded By", "Date", "URL"]];
-    for (const doc of documents) {
-      const folder = FOLDERS.find((f) => f.value === doc.category)?.label ?? doc.category;
-      rows.push([
-        doc.title,
-        folder,
-        doc.year ? String(doc.year) : "",
-        formatBytes(doc.fileSize),
-        doc.uploadedBy.name,
-        formatDate(doc.createdAt),
-        doc.fileUrl,
-      ]);
-    }
-    const csv = rows.map((r) => r.map((v) => `"${v.replace(/"/g, '""')}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
+  const [zipping, setZipping] = useState(false);
+
+  async function downloadAll() {
+    setZipping(true);
+    const zip = new JSZip();
+
+    await Promise.all(
+      documents.map(async (doc) => {
+        try {
+          const res = await fetch(doc.fileUrl);
+          const blob = await res.blob();
+          const folderLabel = FOLDERS.find((f) => f.value === doc.category)?.label ?? doc.category;
+          const yearPart = doc.year ? String(doc.year) : "No Year";
+          const ext = doc.fileUrl.split(".").pop()?.split("?")[0] ?? "";
+          const filename = `${doc.title.replace(/[/\\?%*:|"<>]/g, "-")}${ext ? `.${ext}` : ""}`;
+          zip.folder(folderLabel)?.folder(yearPart)?.file(filename, blob);
+        } catch {
+          // skip files that fail to fetch
+        }
+      })
+    );
+
+    const content = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(content);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "documents.csv";
+    a.download = "documents.zip";
     a.click();
     URL.revokeObjectURL(url);
+    setZipping(false);
   }
 
   /* ── Level 1: Folder grid ── */
@@ -153,10 +162,11 @@ export default function DocumentsPage() {
           </div>
           {documents.length > 0 && (
             <button
-              onClick={exportCSV}
-              className="shrink-0 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              onClick={downloadAll}
+              disabled={zipping}
+              className="shrink-0 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
             >
-              Export CSV
+              {zipping ? "Preparing ZIP…" : "⬇ Download All"}
             </button>
           )}
         </div>
