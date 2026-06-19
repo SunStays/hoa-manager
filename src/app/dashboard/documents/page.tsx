@@ -127,7 +127,7 @@ export default function DocumentsPage() {
     await Promise.all(
       documents.map(async (doc) => {
         try {
-          const res = await fetch(doc.fileUrl);
+          const res = await fetch(`/api/documents/${doc.id}/download`);
           const blob = await res.blob();
           const folderLabel = FOLDERS.find((f) => f.value === doc.category)?.label ?? doc.category;
           const yearPart = doc.year ? String(doc.year) : "No Year";
@@ -273,7 +273,7 @@ export default function DocumentsPage() {
               {yearDocs.map((doc) => (
                 <tr key={doc.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                   <td className="px-5 py-3.5">
-                    <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-gray-900 hover:text-blue-600 hover:underline">
+                    <a href={`/api/documents/${doc.id}/download`} className="font-semibold text-gray-900 hover:text-blue-600 hover:underline">
                       {doc.title}
                     </a>
                   </td>
@@ -281,7 +281,7 @@ export default function DocumentsPage() {
                   <td className="px-5 py-3.5 text-gray-600">{doc.uploadedBy.name}</td>
                   <td className="px-5 py-3.5 text-gray-500">{formatDate(doc.createdAt)}</td>
                   <td className="px-5 py-3.5 text-right whitespace-nowrap">
-                    <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-xs font-medium mr-3">Download</a>
+                    <a href={`/api/documents/${doc.id}/download`} className="text-blue-600 hover:underline text-xs font-medium mr-3">Download</a>
                     <button onClick={() => setDeleteId(doc.id)} className="text-red-500 hover:underline text-xs font-medium">Delete</button>
                   </td>
                 </tr>
