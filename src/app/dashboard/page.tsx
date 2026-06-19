@@ -18,11 +18,14 @@ export default function DashboardPage() {
   const [announcements, setAnnouncements] = useState<Announcement[] | null>(null);
 
   useEffect(() => {
+    const safe = (p: Promise<Response>) =>
+      p.then((r) => (r.ok ? r.json().catch(() => null) : null)).catch(() => null);
+
     Promise.all([
-      fetch("/api/community").then((r) => r.json()),
-      fetch("/api/units").then((r) => r.json()),
-      fetch("/api/residents").then((r) => r.json()),
-      fetch("/api/announcements").then((r) => r.json()),
+      safe(fetch("/api/community")),
+      safe(fetch("/api/units")),
+      safe(fetch("/api/residents")),
+      safe(fetch("/api/announcements")),
     ]).then(([community, units, residents, ann]) => {
       setCommunityName(community?.name ?? null);
       setUnitCount(Array.isArray(units) ? units.length : 0);
