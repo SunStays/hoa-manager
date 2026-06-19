@@ -176,14 +176,12 @@ export default function MaintenancePage() {
             {isBoard ? "All maintenance requests from residents" : "Submit and track your maintenance requests"}
           </p>
         </div>
-        {!isBoard && (
-          <button
-            onClick={() => { setShowForm(true); setFormError(""); setForm(emptyForm); }}
-            className="shrink-0 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
-          >
-            + New Request
-          </button>
-        )}
+        <button
+          onClick={() => { setShowForm(true); setFormError(""); setForm(emptyForm); }}
+          className="shrink-0 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
+        >
+          + New Request
+        </button>
       </div>
 
       {loading ? (
