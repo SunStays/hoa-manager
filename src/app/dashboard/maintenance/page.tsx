@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
 
 type Unit = { id: string; unitNumber: string };
 type Update = { id: string; message: string; status: string | null; createdAt: string; author: { name: string; role: string } };
@@ -41,8 +40,8 @@ const PRIORITY_COLOR: Record<string, string> = {
 const emptyForm = { title: "", description: "", unitId: "", priority: "medium" };
 
 export default function MaintenancePage() {
-  const { data: session } = useSession();
-  const isBoard = session?.user?.role === "board" || session?.user?.role === "admin";
+  const [role, setRole] = useState<string | null>(null);
+  const isBoard = role === "board" || role === "admin";
 
   const [requests, setRequests] = useState<Request[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
@@ -57,11 +56,17 @@ export default function MaintenancePage() {
   const [postingUpdate, setPostingUpdate] = useState(false);
 
   async function load() {
-    const [mRes, uRes] = await Promise.all([fetch("/api/maintenance"), fetch("/api/units/mine")]);
+    const [mRes, uRes, meRes] = await Promise.all([
+      fetch("/api/maintenance"),
+      fetch("/api/units/mine"),
+      fetch("/api/me"),
+    ]);
     const mData = await mRes.json();
     const uData = await uRes.json();
+    const meData = await meRes.json();
     setRequests(Array.isArray(mData) ? mData : []);
     setUnits(Array.isArray(uData) ? uData : []);
+    setRole(meData?.role ?? null);
     setLoading(false);
   }
 
