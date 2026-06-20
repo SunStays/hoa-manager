@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import PushNotificationToggle from "@/components/PushNotificationToggle";
@@ -10,6 +11,7 @@ const navigation = [
   { name: "Units", href: "/dashboard/units", icon: "🏠" },
   { name: "Residents", href: "/dashboard/residents", icon: "👥" },
   { name: "Codes & Numbers", href: "/dashboard/codes", icon: "🔑" },
+  { name: "Messages", href: "/dashboard/messages", icon: "💬" },
   { name: "Maintenance/Request", href: "/dashboard/maintenance", icon: "🔧" },
   { name: "Announcements", href: "/dashboard/announcements", icon: "📣" },
   { name: "Documents", href: "/dashboard/documents", icon: "📁" },
@@ -25,6 +27,19 @@ interface SidebarProps {
 
 export default function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const [unreadMessages, setUnreadMessages] = useState(0);
+
+  useEffect(() => {
+    function fetchUnread() {
+      fetch("/api/threads/unread")
+        .then((r) => r.ok ? r.json() : { count: 0 })
+        .then((data) => setUnreadMessages(data.count ?? 0))
+        .catch(() => {});
+    }
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30_000);
+    return () => clearInterval(interval);
+  }, []);
 
   const navContent = (
     <>
@@ -43,6 +58,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             item.href === "/dashboard"
               ? pathname === "/dashboard"
               : pathname.startsWith(item.href);
+          const badge = item.href === "/dashboard/messages" && unreadMessages > 0 ? unreadMessages : 0;
           return (
             <Link
               key={item.name}
@@ -56,7 +72,12 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
               )}
             >
               <span className="text-base">{item.icon}</span>
-              {item.name}
+              <span className="flex-1">{item.name}</span>
+              {badge > 0 && (
+                <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                  {badge}
+                </span>
+              )}
             </Link>
           );
         })}

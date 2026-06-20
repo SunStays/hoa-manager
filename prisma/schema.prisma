@@ -27,6 +27,7 @@ model Community {
   documents           Document[]
   importantCodes      ImportantCode[]
   maintenanceRequests MaintenanceRequest[]
+  threads             Thread[]
   units               Unit[]
   users               User[]
   votes               Vote[]
@@ -77,6 +78,8 @@ model User {
   maintenanceRequests  MaintenanceRequest[]
   maintenanceUpdates   MaintenanceUpdate[]
   payments             Payment[]
+  residentThread      Thread?              @relation("ResidentThreads")
+  sentMessages        DirectMessage[]      @relation("SentDirectMessages")
   sessions            Session[]
   community           Community            @relation(fields: [communityId], references: [id], onDelete: Cascade)
   units               Unit[]               @relation("UnitResidents")
@@ -267,4 +270,25 @@ model Document {
   createdAt    DateTime  @default(now())
   community    Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
   uploadedBy   User      @relation(fields: [uploadedById], references: [id])
+}
+
+model Thread {
+  id          String          @id @default(cuid())
+  communityId String
+  residentId  String          @unique
+  createdAt   DateTime        @default(now())
+  community   Community       @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  resident    User            @relation("ResidentThreads", fields: [residentId], references: [id])
+  messages    DirectMessage[]
+}
+
+model DirectMessage {
+  id        String    @id @default(cuid())
+  threadId  String
+  senderId  String
+  body      String
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  thread    Thread    @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  sender    User      @relation("SentDirectMessages", fields: [senderId], references: [id])
 }
