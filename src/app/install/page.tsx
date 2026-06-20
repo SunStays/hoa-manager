@@ -2,50 +2,60 @@
 
 import { useEffect, useState } from "react";
 
-type Device = "iphone" | "android" | "desktop";
+type Device = "iphone" | "android" | "mac" | "windows";
 
 function detectDevice(): Device {
-  if (typeof navigator === "undefined") return "desktop";
+  if (typeof navigator === "undefined") return "windows";
   const ua = navigator.userAgent;
   if (/iPhone|iPad|iPod/.test(ua)) return "iphone";
   if (/Android/.test(ua)) return "android";
-  return "desktop";
+  if (/Macintosh|Mac OS X/.test(ua)) return "mac";
+  return "windows";
 }
 
 const steps: Record<Device, { icon: string; text: string }[]> = {
   iphone: [
-    { icon: "🧭", text: 'Open the Safari app — it looks like a blue compass. Chrome does NOT work on iPhone for this!' },
-    { icon: "🔗", text: 'Type this in Safari: hoa-manager-phi.vercel.app' },
-    { icon: "⬆️", text: 'Tap the Share button — the box with an arrow pointing up, at the bottom of the screen' },
-    { icon: "👇", text: 'Scroll down in the menu and tap "Add to Home Screen"' },
+    { icon: "🧭", text: "Open the Safari app — the blue compass icon. Chrome does NOT work on iPhone for this!" },
+    { icon: "🔗", text: "Type this in Safari: hoa-manager-phi.vercel.app" },
+    { icon: "⬆️", text: "Tap the Share button — the box with an arrow pointing up, at the bottom of the screen" },
+    { icon: "👇", text: 'Scroll down and tap "Add to Home Screen"' },
     { icon: "✅", text: 'Tap "Add" in the top right corner' },
-    { icon: "🎉", text: 'Done! The app icon is now on your home screen' },
+    { icon: "🎉", text: "Done! The app icon is now on your home screen" },
   ],
   android: [
-    { icon: "🌐", text: 'Open this page in Chrome (the colourful circle app)' },
-    { icon: "⋮", text: 'Tap the three dots in the top right corner' },
+    { icon: "🌐", text: "Open this page in Chrome (the colourful circle app)" },
+    { icon: "⋮", text: "Tap the three dots in the top right corner" },
     { icon: "📲", text: 'Tap "Add to Home Screen"' },
     { icon: "✅", text: 'Tap "Add"' },
-    { icon: "🎉", text: 'Done! The app is now on your home screen' },
+    { icon: "🎉", text: "Done! The app is now on your home screen" },
   ],
-  desktop: [
-    { icon: "🌐", text: 'Open this page in Chrome or Edge' },
-    { icon: "⊕", text: 'Click the install icon in the address bar (top right)' },
+  mac: [
+    { icon: "🧭", text: "Open Safari on your Mac" },
+    { icon: "🔗", text: "Go to: hoa-manager-phi.vercel.app" },
+    { icon: "⬆️", text: 'Click the Share button in the toolbar — the box with an arrow pointing up — then click "Add to Dock…"' },
+    { icon: "✅", text: 'Click "Add" in the dialog that appears' },
+    { icon: "🎉", text: "Done! The app now appears in your Dock and in your Applications folder" },
+  ],
+  windows: [
+    { icon: "🌐", text: "Open this page in Chrome or Edge" },
+    { icon: "⊕", text: "Click the install icon in the address bar (top right, looks like a screen with a +" },
     { icon: "✅", text: 'Click "Install"' },
-    { icon: "🎉", text: 'Done! The app opens like a normal program' },
+    { icon: "🎉", text: "Done! The app opens like a normal program" },
   ],
 };
 
 const deviceLabels: Record<Device, string> = {
   iphone: "iPhone",
-  android: "Samsung / Android",
-  desktop: "Computer",
+  android: "Android",
+  mac: "Mac",
+  windows: "Windows",
 };
 
 const deviceIcons: Record<Device, string> = {
   iphone: "🍎",
   android: "🤖",
-  desktop: "💻",
+  mac: "🖥️",
+  windows: "💻",
 };
 
 export default function InstallPage() {
@@ -68,11 +78,11 @@ export default function InstallPage() {
 
       {/* Device tabs */}
       <div className="flex gap-2 mb-8 bg-secondary rounded-2xl p-1.5 w-full max-w-sm">
-        {(["iphone", "android", "desktop"] as Device[]).map((d) => (
+        {(["iphone", "android", "mac", "windows"] as Device[]).map((d) => (
           <button
             key={d}
             onClick={() => setDevice(d)}
-            className={`flex-1 flex flex-col items-center gap-1 py-2.5 px-2 rounded-xl text-xs font-semibold transition-all ${
+            className={`flex-1 flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl text-xs font-semibold transition-all ${
               device === d
                 ? "bg-blue-600 text-white shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
@@ -83,6 +93,13 @@ export default function InstallPage() {
           </button>
         ))}
       </div>
+
+      {/* Mac Safari note */}
+      {device === "mac" && (
+        <div className="w-full max-w-sm mb-4 bg-accent border border-border rounded-2xl px-5 py-3 text-sm text-primary">
+          💡 Requires <strong>macOS Ventura or newer</strong> and Safari. This adds the app to your Dock, just like a real app.
+        </div>
+      )}
 
       {/* Steps */}
       <div className="w-full max-w-sm space-y-4">
