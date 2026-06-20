@@ -13,6 +13,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { message, status } = await req.json();
   if (!message) return NextResponse.json({ error: "Message is required." }, { status: 400 });
 
+  const request = await db.maintenanceRequest.findFirst({
+    where: { id, communityId: session.user.communityId },
+  });
+  if (!request) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   const [update] = await db.$transaction([
     db.maintenanceUpdate.create({
       data: {

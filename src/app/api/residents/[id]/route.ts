@@ -14,6 +14,9 @@ const residentSchema = z.object({
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (session.user.role !== "board" && session.user.role !== "admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const { id } = await params;
   const body = await req.json();
@@ -29,6 +32,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (data.email !== user.email) {
     const existing = await db.user.findUnique({ where: { email: data.email } });
     if (existing) return NextResponse.json({ error: "Email already in use." }, { status: 409 });
+  }
+
+  if (data.unitIds.length > 0) {
+    const validUnits = await db.unit.findMany({
+      where: { id: { in: data.unitIds }, communityId: session.user.communityId },
+      select: { id: true },
+    });
+    if (validUnits.length !== data.unitIds.length) {
+      return NextResponse.json({ error: "Invalid unit IDs." }, { status: 400 });
+    }
   }
 
   const updated = await db.user.update({
@@ -57,6 +70,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (session.user.role !== "board" && session.user.role !== "admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const { id } = await params;
 

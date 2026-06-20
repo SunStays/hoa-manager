@@ -17,6 +17,9 @@ export async function GET() {
 export async function PATCH(req: Request) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (session.user.role !== "board" && session.user.role !== "admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const { buildingPmName, buildingPmPhone, buildingPmEmail } = await req.json();
 

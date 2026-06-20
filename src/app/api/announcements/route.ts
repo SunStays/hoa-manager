@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { put } from "@vercel/blob";
-import { sendAnnouncementEmails } from "@/lib/email";
 import { sendPushToCommunity } from "@/lib/push";
 
 export async function GET() {
@@ -54,26 +53,17 @@ export async function POST(req: Request) {
     include: { author: { select: { name: true, role: true } } },
   });
 
-  const community = await db.community.findUnique({
-    where: { id: session.user.communityId },
-    select: { name: true },
-  });
-
-  const residents = await db.user.findMany({
-    where: { communityId: session.user.communityId, NOT: { id: session.user.id } },
-    select: { name: true, email: true },
-  });
-
-  if (community && residents.length > 0) {
-    await sendAnnouncementEmails({
-      communityName: community.name,
-      authorName: announcement.author.name,
-      title,
-      body,
-      recipients: residents,
-      attachmentUrls,
-    }).catch(console.error);
-  }
+  // Email notifications disabled — announcements live in-app only
+  // if (community && residents.length > 0) {
+  //   await sendAnnouncementEmails({
+  //     communityName: community.name,
+  //     authorName: announcement.author.name,
+  //     title,
+  //     body,
+  //     recipients: residents,
+  //     attachmentUrls,
+  //   }).catch(console.error);
+  // }
 
   await sendPushToCommunity(
     session.user.communityId,

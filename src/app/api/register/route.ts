@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 
 const registerSchema = z.object({
   communityName: z.string().min(2),
@@ -49,6 +50,9 @@ export async function POST(req: Request) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: "Invalid input." }, { status: 400 });
+    }
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return NextResponse.json({ error: "An account with this email already exists." }, { status: 409 });
     }
     console.error(error);
     return NextResponse.json({ error: "Something went wrong." }, { status: 500 });
