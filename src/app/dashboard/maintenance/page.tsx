@@ -12,6 +12,7 @@ type Request = {
   priority: string;
   status: string;
   notes: string | null;
+  photos: string[];
   createdAt: string;
   unit: { unitNumber: string };
   submittedBy: { name: string };
@@ -39,6 +40,7 @@ const PRIORITY_COLOR: Record<string, string> = {
 
 const emptyForm = { title: "", description: "", unitId: "", priority: "medium" };
 
+
 export default function MaintenancePage() {
   const [role, setRole] = useState<string | null>(null);
   const isBoard = role === "board" || role === "admin";
@@ -48,6 +50,7 @@ export default function MaintenancePage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [photos, setPhotos] = useState<File[]>([]);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [selected, setSelected] = useState<Request | null>(null);
@@ -90,15 +93,18 @@ export default function MaintenancePage() {
     e.preventDefault();
     setSaving(true);
     setFormError("");
-    const res = await fetch("/api/maintenance", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    const fd = new FormData();
+    fd.append("title", form.title);
+    fd.append("description", form.description);
+    fd.append("unitId", form.unitId);
+    fd.append("priority", form.priority);
+    photos.forEach((f) => fd.append("photos", f));
+    const res = await fetch("/api/maintenance", { method: "POST", body: fd });
     const data = await res.json();
     if (!res.ok) { setFormError(data.error || "Something went wrong."); setSaving(false); return; }
     setShowForm(false);
     setForm(emptyForm);
+    setPhotos([]);
     setSaving(false);
     load();
   }
@@ -183,7 +189,7 @@ export default function MaintenancePage() {
           </p>
         </div>
         <button
-          onClick={() => { setShowForm(true); setFormError(""); setForm(emptyForm); }}
+          onClick={() => { setShowForm(true); setFormError(""); setForm(emptyForm); setPhotos([]); }}
           className="shrink-0 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
         >
           + New Request
@@ -266,6 +272,35 @@ export default function MaintenancePage() {
                   <option value="high">High</option>
                 </select>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Photos <span className="text-muted-foreground font-normal">(optional)</span></label>
+                <label className="flex items-center justify-center gap-2 w-full px-3 py-3 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+                  <span className="text-lg">📷</span>
+                  <span className="text-sm text-muted-foreground">Take a photo or choose from library</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => setPhotos(Array.from(e.target.files ?? []))}
+                  />
+                </label>
+                {photos.length > 0 && (
+                  <div className="flex gap-2 mt-2 flex-wrap">
+                    {photos.map((f, i) => (
+                      <div key={i} className="relative">
+                        <img src={URL.createObjectURL(f)} className="w-16 h-16 object-cover rounded-lg border border-border" />
+                        <button
+                          type="button"
+                          onClick={() => setPhotos(photos.filter((_, j) => j !== i))}
+                          className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-xs flex items-center justify-center leading-none"
+                        >✕</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
               {formError && <p className="text-red-400 text-sm bg-red-500/20 px-3 py-2 rounded-lg">{formError}</p>}
               <div className="flex gap-3 pt-1">
                 <button type="button" onClick={() => setShowForm(false)} className="flex-1 px-4 py-2 border border-border text-foreground text-sm font-medium rounded-lg hover:bg-background">
@@ -311,6 +346,20 @@ export default function MaintenancePage() {
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Description</p>
                 <p className="text-sm text-foreground whitespace-pre-wrap">{selected.description}</p>
               </div>
+
+              {/* Photos */}
+              {selected.photos?.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Photos</p>
+                  <div className="flex gap-2 flex-wrap">
+                    {selected.photos.map((url, i) => (
+                      <a key={i} href={url} target="_blank" rel="noopener noreferrer">
+                        <img src={url} className="w-24 h-24 object-cover rounded-lg border border-border hover:opacity-80 transition-opacity" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Board status controls */}
               {isBoard && (

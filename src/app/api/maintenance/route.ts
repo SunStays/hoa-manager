@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { put } from "@vercel/blob";
 
 export async function GET() {
   const session = await auth();
@@ -35,10 +36,22 @@ export async function POST(req: Request) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { title, description, unitId, priority } = await req.json();
+  const formData = await req.formData();
+  const title = formData.get("title") as string;
+  const description = formData.get("description") as string;
+  const unitId = formData.get("unitId") as string;
+  const priority = (formData.get("priority") as string) || "medium";
+  const files = formData.getAll("photos") as File[];
+
   if (!title || !description || !unitId) {
     return NextResponse.json({ error: "Title, description, and unit are required." }, { status: 400 });
   }
+
+  const photoUrls = await Promise.all(
+    files.filter((f) => f.size > 0).map((f) =>
+      put(`hoa/${session.user.communityId}/maintenance/${Date.now()}-${f.name}`, f, { access: "public" }).then((b) => b.url)
+    )
+  );
 
   const request = await db.maintenanceRequest.create({
     data: {
@@ -47,7 +60,8 @@ export async function POST(req: Request) {
       unitId,
       title,
       description,
-      priority: priority || "medium",
+      priority,
+      photos: photoUrls,
     },
     include: {
       unit: { select: { unitNumber: true } },
