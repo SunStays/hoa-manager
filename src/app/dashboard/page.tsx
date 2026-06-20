@@ -43,7 +43,10 @@ export default function DashboardPage() {
         .then((r) => r.ok ? r.json() : [])
         .then((data) => setOnline(Array.isArray(data) ? data : []));
     }
-    refreshPresence();
+
+    // Fire heartbeat first, then immediately refresh presence so the current
+    // user is already in the list on the first render.
+    fetch("/api/me/heartbeat", { method: "POST" }).then(refreshPresence);
     const interval = setInterval(refreshPresence, 30_000);
     return () => clearInterval(interval);
   }, []);
