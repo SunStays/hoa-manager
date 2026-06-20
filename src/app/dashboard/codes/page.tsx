@@ -153,13 +153,13 @@ export default function CodesPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="font-mono text-lg font-bold text-foreground tracking-widest">
-                            {revealed.has(c.id) ? c.value : "•".repeat(Math.min(c.value.length, 8))}
+                            {!revealed.has(c.id) ? c.value : "•".repeat(Math.min(c.value.length, 8))}
                           </span>
                           <button
                             onClick={() => toggleReveal(c.id)}
                             className="text-xs text-primary hover:underline"
                           >
-                            {revealed.has(c.id) ? "Hide" : "Show"}
+                            {!revealed.has(c.id) ? "Hide" : "Show"}
                           </button>
                         </div>
                         {c.note && <p className="text-xs text-muted-foreground mt-1">{c.note}</p>}
