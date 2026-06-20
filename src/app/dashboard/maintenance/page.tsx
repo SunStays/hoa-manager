@@ -280,7 +280,6 @@ export default function MaintenancePage() {
                   <input
                     type="file"
                     accept="image/*"
-                    capture="environment"
                     multiple
                     className="hidden"
                     onChange={(e) => setPhotos(Array.from(e.target.files ?? []))}
