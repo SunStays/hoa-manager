@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import PushNotificationToggle from "@/components/PushNotificationToggle";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: "⊞" },
@@ -61,7 +62,8 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         })}
       </nav>
 
-      <div className="px-3 py-4 border-t border-border">
+      <div className="px-3 py-4 border-t border-border space-y-1">
+        <PushNotificationToggle />
         <form action="/api/auth/signout" method="POST">
           <button
             type="submit"

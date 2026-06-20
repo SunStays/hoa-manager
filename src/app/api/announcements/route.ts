@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { put } from "@vercel/blob";
 import { sendAnnouncementEmails } from "@/lib/email";
+import { sendPushToCommunity } from "@/lib/push";
 
 export async function GET() {
   const session = await auth();
@@ -73,6 +74,12 @@ export async function POST(req: Request) {
       attachmentUrls,
     }).catch(console.error);
   }
+
+  await sendPushToCommunity(
+    session.user.communityId,
+    `📣 ${title}`,
+    body.length > 100 ? body.slice(0, 97) + "…" : body
+  ).catch(console.error);
 
   return NextResponse.json(announcement, { status: 201 });
 }
