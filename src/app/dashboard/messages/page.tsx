@@ -178,11 +178,10 @@ export default function MessagesPage() {
       body: JSON.stringify({ residentId }),
     });
     if (res.ok) {
-      const thread = await res.json();
+      const thread: Thread = await res.json();
       setThreads((prev) => {
         const exists = prev.find((t) => t.id === thread.id);
-        if (exists) { setSelectedId(thread.id); return prev; }
-        return [{ ...thread, unreadCount: 0 }, ...prev];
+        return exists ? prev : [{ ...thread, unreadCount: 0 }, ...prev];
       });
       setSelectedId(thread.id);
       setShowPicker(false);

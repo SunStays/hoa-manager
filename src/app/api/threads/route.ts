@@ -86,6 +86,7 @@ export async function POST(req: NextRequest) {
     create: { communityId: session.user.communityId, residentId },
     update: {},
     include: {
+      resident: { select: { id: true, name: true, role: true } },
       messages: {
         orderBy: { createdAt: "asc" },
         include: { sender: { select: { id: true, name: true, role: true } } },
