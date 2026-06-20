@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "@/components/layout/Sidebar";
 
 export default function DashboardLayout({
@@ -9,6 +9,14 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/me/heartbeat", { method: "POST" });
+    const interval = setInterval(() => {
+      fetch("/api/me/heartbeat", { method: "POST" });
+    }, 30_000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="flex h-screen bg-background">

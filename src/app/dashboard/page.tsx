@@ -11,11 +11,16 @@ type Announcement = {
   author: { name: string };
 };
 
+type OnlineUser = { id: string; name: string; role: string };
+
+const roleLabel: Record<string, string> = { admin: "Admin", board: "Board", resident: "Resident" };
+
 export default function DashboardPage() {
   const [communityName, setCommunityName] = useState<string | null>(null);
   const [unitCount, setUnitCount] = useState<number | null>(null);
   const [residentCount, setResidentCount] = useState<number | null>(null);
   const [announcements, setAnnouncements] = useState<Announcement[] | null>(null);
+  const [online, setOnline] = useState<OnlineUser[]>([]);
 
   useEffect(() => {
     const safe = (p: Promise<Response>) =>
@@ -32,6 +37,15 @@ export default function DashboardPage() {
       setResidentCount(Array.isArray(residents) ? residents.length : 0);
       setAnnouncements(Array.isArray(ann) ? ann.slice(0, 5) : []);
     });
+
+    function refreshPresence() {
+      fetch("/api/presence")
+        .then((r) => r.ok ? r.json() : [])
+        .then((data) => setOnline(Array.isArray(data) ? data : []));
+    }
+    refreshPresence();
+    const interval = setInterval(refreshPresence, 30_000);
+    return () => clearInterval(interval);
   }, []);
 
   const loading = unitCount === null;
@@ -69,6 +83,25 @@ export default function DashboardPage() {
           </Link>
         ))}
       </div>
+
+      {online.length > 0 && (
+        <div className="bg-card rounded-xl border border-border p-5 mb-4">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            <h2 className="font-semibold text-foreground">Online now</h2>
+            <span className="text-xs text-muted-foreground">({online.length})</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {online.map((u) => (
+              <div key={u.id} className="flex items-center gap-1.5 bg-secondary rounded-full px-3 py-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />
+                <span className="text-sm text-foreground font-medium">{u.name}</span>
+                <span className="text-xs text-muted-foreground">{roleLabel[u.role] ?? u.role}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="bg-card rounded-xl border border-border p-5">
         <h2 className="font-semibold text-foreground mb-4">Recent Announcements</h2>
