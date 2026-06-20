@@ -108,6 +108,37 @@ export default function InstallPage() {
         <p className="text-primary font-bold text-lg break-all">hoa-manager-phi.vercel.app</p>
       </div>
 
+      {/* Login instructions */}
+      <div className="mt-6 w-full max-w-sm bg-card border border-border rounded-2xl px-5 py-5">
+        <h2 className="text-foreground font-bold text-lg mb-4 text-center">🔐 How to log in</h2>
+        <div className="space-y-3">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold shrink-0">1</div>
+            <p className="text-foreground text-sm pt-1">Open the app and tap <strong>Sign in</strong></p>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold shrink-0">2</div>
+            <p className="text-foreground text-sm pt-1">Enter your <strong>email address</strong></p>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold shrink-0">3</div>
+            <div className="pt-1">
+              <p className="text-foreground text-sm">Your first password is:</p>
+              <p className="text-primary font-bold text-2xl tracking-widest mt-1">LA26</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold shrink-0">4</div>
+            <p className="text-foreground text-sm pt-1">Once inside, go to <strong>Settings ⚙️</strong> to choose your own personal password</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Forgot password */}
+      <div className="mt-4 w-full max-w-sm bg-secondary border border-border rounded-2xl px-5 py-4 text-center">
+        <p className="text-muted-foreground text-sm">Forgot your password? Tap <strong className="text-foreground">"Forgot password?"</strong> on the login screen and we will send a reset link to your email. 📬</p>
+      </div>
+
       <p className="text-muted-foreground text-sm mt-8 text-center max-w-xs">
         Need help? Ask your building manager 🏠
       </p>
