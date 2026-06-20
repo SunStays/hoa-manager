@@ -121,6 +121,9 @@ function ConversationPane({
                   {m.body}
                 </div>
                 <span className="text-[10px] text-muted-foreground px-1">{formatTime(m.createdAt)}</span>
+                {isMe && m.readAt && (
+                  <span className="text-[10px] text-primary/70 px-1">Read · {formatTime(m.readAt)}</span>
+                )}
               </div>
             </div>
           );
