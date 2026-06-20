@@ -105,7 +105,7 @@ export default function InstallPage() {
       {/* URL reminder */}
       <div className="mt-10 w-full max-w-sm bg-secondary border border-border rounded-2xl px-5 py-4 text-center">
         <p className="text-muted-foreground text-sm mb-1">The app address is:</p>
-        <p className="text-primary font-bold text-lg break-all">hoa-manager-phi.vercel.app</p>
+        <a href="https://hoa-manager-phi.vercel.app" className="text-primary font-bold text-lg break-all underline">hoa-manager-phi.vercel.app</a>
       </div>
 
       {/* Login instructions */}
