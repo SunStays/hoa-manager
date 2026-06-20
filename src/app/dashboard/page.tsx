@@ -37,17 +37,17 @@ export default function DashboardPage() {
   const loading = unitCount === null;
 
   const stats = [
-    { label: "Total Units", value: unitCount, icon: "🏠", color: "bg-blue-50 text-blue-700", href: "/dashboard/units" },
-    { label: "Residents", value: residentCount, icon: "👥", color: "bg-green-50 text-green-700", href: "/dashboard/residents" },
+    { label: "Total Units", value: unitCount, icon: "🏠", color: "bg-accent text-primary", href: "/dashboard/units" },
+    { label: "Residents", value: residentCount, icon: "👥", color: "bg-green-500/20 text-green-400", href: "/dashboard/residents" },
   ];
 
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-foreground">
           {communityName ?? "Dashboard"}
         </h1>
-        <p className="text-gray-500 mt-1">Welcome to HOA Manager</p>
+        <p className="text-muted-foreground mt-1">Welcome to HOA Manager</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
@@ -55,35 +55,35 @@ export default function DashboardPage() {
           <Link
             key={stat.label}
             href={stat.href}
-            className="bg-white rounded-xl border border-gray-100 p-5 hover:border-gray-200 transition-colors"
+            className="bg-card rounded-xl border border-border p-5 hover:border-border transition-colors"
           >
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-medium text-gray-500">{stat.label}</span>
+              <span className="text-sm font-medium text-muted-foreground">{stat.label}</span>
               <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-base ${stat.color}`}>
                 {stat.icon}
               </span>
             </div>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-2xl font-bold text-foreground">
               {loading ? "—" : stat.value}
             </p>
           </Link>
         ))}
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-100 p-5">
-        <h2 className="font-semibold text-gray-900 mb-4">Recent Announcements</h2>
+      <div className="bg-card rounded-xl border border-border p-5">
+        <h2 className="font-semibold text-foreground mb-4">Recent Announcements</h2>
         {announcements === null ? (
-          <p className="text-sm text-gray-400">Loading...</p>
+          <p className="text-sm text-muted-foreground">Loading...</p>
         ) : announcements.length === 0 ? (
-          <p className="text-sm text-gray-400">No announcements yet.</p>
+          <p className="text-sm text-muted-foreground">No announcements yet.</p>
         ) : (
           <ul className="space-y-3">
             {announcements.map((a) => (
               <li key={a.id} className="flex items-start gap-3">
                 {a.pinned && <span className="text-xs mt-0.5">📌</span>}
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{a.title}</p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-sm font-medium text-foreground truncate">{a.title}</p>
+                  <p className="text-xs text-muted-foreground">
                     {a.author.name} · {new Date(a.publishedAt).toLocaleDateString()}
                   </p>
                 </div>
@@ -91,7 +91,7 @@ export default function DashboardPage() {
             ))}
           </ul>
         )}
-        <Link href="/dashboard/announcements" className="mt-4 block text-xs font-medium text-blue-600 hover:underline">
+        <Link href="/dashboard/announcements" className="mt-4 block text-xs font-medium text-primary hover:underline">
           View all →
         </Link>
       </div>

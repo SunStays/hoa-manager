@@ -1,9 +1,50 @@
 @import "tailwindcss";
 
+@theme {
+  --color-background: hsl(228 25% 6%);
+  --color-foreground: hsl(228 20% 90%);
+  --color-card: hsl(228 18% 10%);
+  --color-card-foreground: hsl(228 20% 90%);
+  --color-secondary: hsl(228 22% 14%);
+  --color-secondary-foreground: hsl(228 20% 88%);
+  --color-muted: hsl(228 22% 14%);
+  --color-muted-foreground: hsl(228 12% 58%);
+  --color-border: hsl(228 22% 15%);
+  --color-input: hsl(228 22% 14%);
+  --color-primary: hsl(221 83% 58%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-accent: hsl(228 22% 18%);
+  --color-accent-foreground: hsl(221 91% 76%);
+  --color-destructive: hsl(0 72% 58%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+  --color-sidebar: hsl(228 20% 7%);
+  --color-sidebar-foreground: hsl(228 20% 88%);
+  --color-sidebar-accent: hsl(228 22% 12%);
+  --color-sidebar-border: hsl(228 22% 12%);
+}
+
 * {
   box-sizing: border-box;
+  border-color: hsl(228 22% 15%);
 }
 
 body {
   margin: 0;
+  background-color: hsl(228 25% 6%);
+  color: hsl(228 20% 90%);
 }
+
+input, textarea, select {
+  color: hsl(228 20% 90%);
+  background-color: hsl(228 22% 14%);
+}
+
+input::placeholder, textarea::placeholder {
+  color: hsl(228 12% 45%);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(228 22% 20%); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(228 12% 40%); }

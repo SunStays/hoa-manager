@@ -26,7 +26,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="nl" className="h-full">
-      <body className="h-full bg-gray-50 text-gray-900 antialiased" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif" }}>
+      <body className="h-full bg-background text-foreground antialiased" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif" }}>
         {children}
       </body>
     </html>

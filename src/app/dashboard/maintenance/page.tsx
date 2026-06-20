@@ -26,15 +26,15 @@ const STATUS_LABEL: Record<string, string> = {
   closed: "Closed",
 };
 const STATUS_COLOR: Record<string, string> = {
-  open: "bg-yellow-50 text-yellow-700",
-  in_progress: "bg-blue-50 text-blue-700",
-  resolved: "bg-green-50 text-green-700",
-  closed: "bg-gray-100 text-gray-500",
+  open: "bg-yellow-500/20 text-yellow-400",
+  in_progress: "bg-accent text-primary",
+  resolved: "bg-green-500/20 text-green-400",
+  closed: "bg-secondary text-muted-foreground",
 };
 const PRIORITY_COLOR: Record<string, string> = {
-  low: "bg-gray-100 text-gray-500",
-  medium: "bg-orange-50 text-orange-600",
-  high: "bg-red-50 text-red-600",
+  low: "bg-secondary text-muted-foreground",
+  medium: "bg-orange-500/20 text-orange-600",
+  high: "bg-red-500/20 text-red-400",
 };
 
 const emptyForm = { title: "", description: "", unitId: "", priority: "medium" };
@@ -135,26 +135,26 @@ export default function MaintenancePage() {
     return (
       <div
         onClick={() => setSelected(r)}
-        className="bg-white rounded-xl border border-gray-100 px-5 py-4 cursor-pointer hover:border-gray-200 transition-colors"
+        className="bg-card rounded-xl border border-border px-5 py-4 cursor-pointer hover:border-border transition-colors"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span className="font-semibold text-gray-900">{r.title}</span>
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLOR[r.status] ?? "bg-gray-100 text-gray-500"}`}>
+              <span className="font-semibold text-foreground">{r.title}</span>
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLOR[r.status] ?? "bg-secondary text-muted-foreground"}`}>
                 {STATUS_LABEL[r.status] ?? r.status}
               </span>
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${PRIORITY_COLOR[r.priority] ?? "bg-gray-100 text-gray-500"}`}>
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${PRIORITY_COLOR[r.priority] ?? "bg-secondary text-muted-foreground"}`}>
                 {r.priority}
               </span>
             </div>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-muted-foreground">
               Unit #{r.unit.unitNumber} · {r.submittedBy.name} · {new Date(r.createdAt).toLocaleDateString()}
             </p>
-            <p className="text-sm text-gray-600 mt-1 line-clamp-2">{r.description}</p>
+            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{r.description}</p>
           </div>
           {(r.updates.length > 0 || r.announcements.length > 0) && (
-            <span className="shrink-0 text-xs text-blue-500 mt-0.5">
+            <span className="shrink-0 text-xs text-primary mt-0.5">
               {r.updates.length + r.announcements.length} update{r.updates.length + r.announcements.length !== 1 ? "s" : ""}
             </span>
           )}
@@ -167,7 +167,7 @@ export default function MaintenancePage() {
     if (items.length === 0) return null;
     return (
       <section>
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">{label}</h2>
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">{label}</h2>
         <div className="space-y-2">{items.map((r) => <RequestCard key={r.id} r={r} />)}</div>
       </section>
     );
@@ -177,8 +177,8 @@ export default function MaintenancePage() {
     <div>
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Maintenance / Request</h1>
-          <p className="text-gray-500 text-sm mt-0.5">
+          <h1 className="text-2xl font-bold text-foreground">Maintenance / Request</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">
             {isBoard ? "All maintenance requests from residents" : "Submit and track your maintenance requests"}
           </p>
         </div>
@@ -191,11 +191,11 @@ export default function MaintenancePage() {
       </div>
 
       {loading ? (
-        <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>
+        <div className="p-8 text-center text-muted-foreground text-sm">Loading...</div>
       ) : requests.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
+        <div className="bg-card rounded-xl border border-border p-12 text-center">
           <p className="text-3xl mb-3">🔧</p>
-          <p className="text-gray-500 text-sm mb-4">
+          <p className="text-muted-foreground text-sm mb-4">
             {isBoard ? "No maintenance requests yet." : "No requests yet. Submit one if something needs attention."}
           </p>
           {!isBoard && (
@@ -215,27 +215,27 @@ export default function MaintenancePage() {
       {/* Submit request modal (residents) */}
       {showForm && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-5">New Maintenance Request</h2>
+          <div className="bg-card rounded-2xl shadow-xl w-full max-w-md p-6">
+            <h2 className="text-lg font-bold text-foreground mb-5">New Maintenance Request</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Title *</label>
                 <input
                   type="text"
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   required
                   placeholder="e.g. Leaking faucet in bathroom"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Unit *</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Unit *</label>
                 <select
                   value={form.unitId}
                   onChange={(e) => setForm({ ...form, unitId: e.target.value })}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select your unit</option>
                   {units.map((u) => (
@@ -244,31 +244,31 @@ export default function MaintenancePage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Description *</label>
                 <textarea
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   required
                   rows={4}
                   placeholder="Describe the issue in detail..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Priority</label>
                 <select
                   value={form.priority}
                   onChange={(e) => setForm({ ...form, priority: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
                 </select>
               </div>
-              {formError && <p className="text-red-600 text-sm bg-red-50 px-3 py-2 rounded-lg">{formError}</p>}
+              {formError && <p className="text-red-400 text-sm bg-red-500/20 px-3 py-2 rounded-lg">{formError}</p>}
               <div className="flex gap-3 pt-1">
-                <button type="button" onClick={() => setShowForm(false)} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50">
+                <button type="button" onClick={() => setShowForm(false)} className="flex-1 px-4 py-2 border border-border text-foreground text-sm font-medium rounded-lg hover:bg-background">
                   Cancel
                 </button>
                 <button type="submit" disabled={saving} className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50">
@@ -283,39 +283,39 @@ export default function MaintenancePage() {
       {/* Request detail panel */}
       {selected && (
         <div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50 px-0 sm:px-4">
-          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full sm:max-w-lg max-h-[90vh] flex flex-col">
+          <div className="bg-card rounded-t-2xl sm:rounded-2xl shadow-xl w-full sm:max-w-lg max-h-[90vh] flex flex-col">
             {/* Header */}
-            <div className="px-6 pt-6 pb-4 border-b border-gray-100 flex items-start justify-between gap-3">
+            <div className="px-6 pt-6 pb-4 border-b border-border flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <h2 className="text-lg font-bold text-gray-900">{selected.title}</h2>
-                <p className="text-xs text-gray-400 mt-0.5">
+                <h2 className="text-lg font-bold text-foreground">{selected.title}</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Unit #{selected.unit.unitNumber} · {selected.submittedBy.name} · {new Date(selected.createdAt).toLocaleDateString()}
                 </p>
               </div>
-              <button onClick={() => setSelected(null)} className="shrink-0 text-gray-400 hover:text-gray-600 text-lg leading-none">✕</button>
+              <button onClick={() => setSelected(null)} className="shrink-0 text-muted-foreground hover:text-muted-foreground text-lg leading-none">✕</button>
             </div>
 
             <div className="overflow-y-auto flex-1 px-6 py-4 space-y-5">
               {/* Status + priority badges */}
               <div className="flex gap-2 flex-wrap">
-                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${STATUS_COLOR[selected.status] ?? "bg-gray-100 text-gray-500"}`}>
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${STATUS_COLOR[selected.status] ?? "bg-secondary text-muted-foreground"}`}>
                   {STATUS_LABEL[selected.status] ?? selected.status}
                 </span>
-                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${PRIORITY_COLOR[selected.priority] ?? "bg-gray-100 text-gray-500"}`}>
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${PRIORITY_COLOR[selected.priority] ?? "bg-secondary text-muted-foreground"}`}>
                   {selected.priority} priority
                 </span>
               </div>
 
               {/* Description */}
               <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Description</p>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">{selected.description}</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Description</p>
+                <p className="text-sm text-foreground whitespace-pre-wrap">{selected.description}</p>
               </div>
 
               {/* Board status controls */}
               {isBoard && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Change Status</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Change Status</p>
                   <div className="flex gap-2 flex-wrap">
                     {Object.entries(STATUS_LABEL).map(([val, lbl]) => (
                       <button
@@ -325,7 +325,7 @@ export default function MaintenancePage() {
                         className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                           selected.status === val
                             ? "border-blue-600 bg-blue-600 text-white"
-                            : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                            : "border-border text-muted-foreground hover:border-border hover:bg-background"
                         }`}
                       >
                         {lbl}
@@ -338,13 +338,13 @@ export default function MaintenancePage() {
               {/* Announcements linked to this request */}
               {selected.announcements.length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">📣 Announcements</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">📣 Announcements</p>
                   <div className="space-y-2">
                     {selected.announcements.map((a) => (
-                      <div key={a.id} className="bg-blue-50 rounded-lg px-4 py-3">
+                      <div key={a.id} className="bg-accent rounded-lg px-4 py-3">
                         <p className="text-sm font-semibold text-blue-900">{a.title}</p>
-                        <p className="text-xs text-blue-700 mt-0.5">{a.body}</p>
-                        <p className="text-xs text-blue-400 mt-1">{a.author.name} · {new Date(a.publishedAt).toLocaleDateString()}</p>
+                        <p className="text-xs text-primary mt-0.5">{a.body}</p>
+                        <p className="text-xs text-primary mt-1">{a.author.name} · {new Date(a.publishedAt).toLocaleDateString()}</p>
                       </div>
                     ))}
                   </div>
@@ -354,19 +354,19 @@ export default function MaintenancePage() {
               {/* Updates timeline */}
               {selected.updates.length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Updates</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Updates</p>
                   <div className="space-y-3">
                     {selected.updates.map((u) => (
                       <div key={u.id} className="flex gap-3">
                         <div className="w-1.5 rounded-full bg-blue-200 shrink-0 mt-1" />
                         <div>
-                          <p className="text-sm text-gray-700">{u.message}</p>
+                          <p className="text-sm text-foreground">{u.message}</p>
                           {u.status && (
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${STATUS_COLOR[u.status] ?? "bg-gray-100 text-gray-500"}`}>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${STATUS_COLOR[u.status] ?? "bg-secondary text-muted-foreground"}`}>
                               → {STATUS_LABEL[u.status] ?? u.status}
                             </span>
                           )}
-                          <p className="text-xs text-gray-400 mt-0.5">{u.author.name} · {new Date(u.createdAt).toLocaleDateString()}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{u.author.name} · {new Date(u.createdAt).toLocaleDateString()}</p>
                         </div>
                       </div>
                     ))}
@@ -376,20 +376,20 @@ export default function MaintenancePage() {
 
               {/* Board: post update */}
               {isBoard && (
-                <form onSubmit={handlePostUpdate} className="space-y-3 pt-2 border-t border-gray-100">
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Post Update</p>
+                <form onSubmit={handlePostUpdate} className="space-y-3 pt-2 border-t border-border">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Post Update</p>
                   <textarea
                     value={updateMsg}
                     onChange={(e) => setUpdateMsg(e.target.value)}
                     rows={3}
                     placeholder="Write an update for the resident..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                   />
                   <div className="flex gap-2 items-center">
                     <select
                       value={updateStatus}
                       onChange={(e) => setUpdateStatus(e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">No status change</option>
                       {Object.entries(STATUS_LABEL).map(([val, lbl]) => (

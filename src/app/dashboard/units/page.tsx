@@ -110,8 +110,8 @@ export default function UnitsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Units</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Manage all units in your community</p>
+          <h1 className="text-2xl font-bold text-foreground">Units</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">Manage all units in your community</p>
         </div>
         <button
           onClick={openAdd}
@@ -128,18 +128,18 @@ export default function UnitsPage() {
           { label: "Occupied", value: occupied },
           { label: "Vacant", value: vacant },
         ].map((s) => (
-          <div key={s.label} className="bg-white rounded-xl border border-gray-100 p-4">
-            <p className="text-sm text-gray-500">{s.label}</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{s.value}</p>
+          <div key={s.label} className="bg-card rounded-xl border border-border p-4">
+            <p className="text-sm text-muted-foreground">{s.label}</p>
+            <p className="text-2xl font-bold text-foreground mt-1">{s.value}</p>
           </div>
         ))}
       </div>
 
       {loading ? (
-        <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>
+        <div className="p-8 text-center text-muted-foreground text-sm">Loading...</div>
       ) : units.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
-          <p className="text-gray-400 text-sm mb-3">No units yet.</p>
+        <div className="bg-card rounded-xl border border-border p-12 text-center">
+          <p className="text-muted-foreground text-sm mb-3">No units yet.</p>
           <button onClick={openAdd} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
             Add your first unit
           </button>
@@ -149,78 +149,78 @@ export default function UnitsPage() {
           {/* Mobile cards */}
           <div className="md:hidden space-y-3">
             {units.map((unit) => (
-              <div key={unit.id} className="bg-white rounded-xl border border-gray-100 p-4">
+              <div key={unit.id} className="bg-card rounded-xl border border-border p-4">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div>
-                    <p className="font-bold text-gray-900 text-base">Unit #{unit.unitNumber}</p>
-                    {unit.address && <p className="text-sm text-gray-500">{unit.address}</p>}
-                    <p className="text-sm text-gray-500 mt-0.5">
+                    <p className="font-bold text-foreground text-base">Unit #{unit.unitNumber}</p>
+                    {unit.address && <p className="text-sm text-muted-foreground">{unit.address}</p>}
+                    <p className="text-sm text-muted-foreground mt-0.5">
                       {unit.residents.length === 0 ? "No residents" : unit.residents.map((r) => r.name).join(", ")}
                     </p>
                   </div>
                   <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                    unit.status === "occupied" ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-500"
+                    unit.status === "occupied" ? "bg-green-500/20 text-green-400" : "bg-secondary text-muted-foreground"
                   }`}>
                     {unit.status === "occupied" ? "Occupied" : "Vacant"}
                   </span>
                 </div>
-                <p className="text-sm font-semibold text-gray-900 mb-3">{formatCurrency(Number(unit.monthlyDues))} / month</p>
-                <div className="flex gap-2 pt-1 border-t border-gray-50">
-                  <button onClick={() => openEdit(unit)} className="flex-1 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">Edit</button>
-                  <button onClick={() => setDeleteId(unit.id)} className="flex-1 py-1.5 text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg transition-colors">Delete</button>
+                <p className="text-sm font-semibold text-foreground mb-3">{formatCurrency(Number(unit.monthlyDues))} / month</p>
+                <div className="flex gap-2 pt-1 border-t border-border">
+                  <button onClick={() => openEdit(unit)} className="flex-1 py-1.5 text-sm font-medium text-primary hover:bg-accent rounded-lg transition-colors">Edit</button>
+                  <button onClick={() => setDeleteId(unit.id)} className="flex-1 py-1.5 text-sm font-medium text-red-400 hover:bg-red-500/20 rounded-lg transition-colors">Delete</button>
                 </div>
               </div>
             ))}
-            <div className="bg-gray-50 rounded-xl border border-gray-100 px-4 py-3 flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-500">Total monthly dues</span>
-              <span className="text-sm font-bold text-gray-900">{formatCurrency(totalDues)}</span>
+            <div className="bg-background rounded-xl border border-border px-4 py-3 flex justify-between items-center">
+              <span className="text-sm font-medium text-muted-foreground">Total monthly dues</span>
+              <span className="text-sm font-bold text-foreground">{formatCurrency(totalDues)}</span>
             </div>
           </div>
 
           {/* Desktop table */}
-          <div className="hidden md:block bg-white rounded-xl border border-gray-100 overflow-hidden">
+          <div className="hidden md:block bg-card rounded-xl border border-border overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50">
-                  <th className="text-left px-5 py-3 font-medium text-gray-500">Unit</th>
-                  <th className="text-left px-5 py-3 font-medium text-gray-500">Address</th>
-                  <th className="text-left px-5 py-3 font-medium text-gray-500">Residents</th>
-                  <th className="text-left px-5 py-3 font-medium text-gray-500">Monthly dues</th>
-                  <th className="text-left px-5 py-3 font-medium text-gray-500">Status</th>
+                <tr className="border-b border-border bg-background">
+                  <th className="text-left px-5 py-3 font-medium text-muted-foreground">Unit</th>
+                  <th className="text-left px-5 py-3 font-medium text-muted-foreground">Address</th>
+                  <th className="text-left px-5 py-3 font-medium text-muted-foreground">Residents</th>
+                  <th className="text-left px-5 py-3 font-medium text-muted-foreground">Monthly dues</th>
+                  <th className="text-left px-5 py-3 font-medium text-muted-foreground">Status</th>
                   <th className="px-5 py-3"></th>
                 </tr>
               </thead>
               <tbody>
                 {units.map((unit) => (
-                  <tr key={unit.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                    <td className="px-5 py-3.5 font-semibold text-gray-900">#{unit.unitNumber}</td>
-                    <td className="px-5 py-3.5 text-gray-600">{unit.address || "—"}</td>
-                    <td className="px-5 py-3.5 text-gray-600">
+                  <tr key={unit.id} className="border-b border-border hover:bg-background transition-colors">
+                    <td className="px-5 py-3.5 font-semibold text-foreground">#{unit.unitNumber}</td>
+                    <td className="px-5 py-3.5 text-muted-foreground">{unit.address || "—"}</td>
+                    <td className="px-5 py-3.5 text-muted-foreground">
                       {unit.residents.length === 0 ? (
-                        <span className="text-gray-300">No residents</span>
+                        <span className="text-muted-foreground">No residents</span>
                       ) : (
                         unit.residents.map((r) => r.name).join(", ")
                       )}
                     </td>
-                    <td className="px-5 py-3.5 text-gray-900 font-medium">{formatCurrency(Number(unit.monthlyDues))}</td>
+                    <td className="px-5 py-3.5 text-foreground font-medium">{formatCurrency(Number(unit.monthlyDues))}</td>
                     <td className="px-5 py-3.5">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                        unit.status === "occupied" ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-500"
+                        unit.status === "occupied" ? "bg-green-500/20 text-green-400" : "bg-secondary text-muted-foreground"
                       }`}>
                         {unit.status === "occupied" ? "Occupied" : "Vacant"}
                       </span>
                     </td>
                     <td className="px-5 py-3.5 text-right">
-                      <button onClick={() => openEdit(unit)} className="text-blue-600 hover:underline text-xs font-medium mr-3">Edit</button>
-                      <button onClick={() => setDeleteId(unit.id)} className="text-red-500 hover:underline text-xs font-medium">Delete</button>
+                      <button onClick={() => openEdit(unit)} className="text-primary hover:underline text-xs font-medium mr-3">Edit</button>
+                      <button onClick={() => setDeleteId(unit.id)} className="text-red-400 hover:underline text-xs font-medium">Delete</button>
                     </td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
-                <tr className="bg-gray-50 border-t border-gray-100">
-                  <td colSpan={3} className="px-5 py-3 text-sm font-medium text-gray-500">Total monthly dues</td>
-                  <td className="px-5 py-3 text-sm font-bold text-gray-900">{formatCurrency(totalDues)}</td>
+                <tr className="bg-background border-t border-border">
+                  <td colSpan={3} className="px-5 py-3 text-sm font-medium text-muted-foreground">Total monthly dues</td>
+                  <td className="px-5 py-3 text-sm font-bold text-foreground">{formatCurrency(totalDues)}</td>
                   <td colSpan={2}></td>
                 </tr>
               </tfoot>
@@ -232,29 +232,29 @@ export default function UnitsPage() {
       {/* Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-5">
+          <div className="bg-card rounded-2xl shadow-xl w-full max-w-md p-6">
+            <h2 className="text-lg font-bold text-foreground mb-5">
               {editUnit ? `Edit unit #${editUnit.unitNumber}` : "Add unit"}
             </h2>
             <form onSubmit={handleSave} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Unit number *</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">Unit number *</label>
                   <input
                     type="text"
                     value={form.unitNumber}
                     onChange={(e) => setForm({ ...form, unitNumber: e.target.value })}
                     required
                     placeholder="e.g. 101"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">Status</label>
                   <select
                     value={form.status}
                     onChange={(e) => setForm({ ...form, status: e.target.value as "occupied" | "vacant" })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="occupied">Occupied</option>
                     <option value="vacant">Vacant</option>
@@ -262,58 +262,58 @@ export default function UnitsPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Address</label>
                 <input
                   type="text"
                   value={form.address}
                   onChange={(e) => setForm({ ...form, address: e.target.value })}
                   placeholder="e.g. Building A, Floor 2"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Floor</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">Floor</label>
                   <input
                     type="number"
                     value={form.floor}
                     onChange={(e) => setForm({ ...form, floor: e.target.value })}
                     placeholder="1"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Size (m²)</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">Size (m²)</label>
                   <input
                     type="number"
                     value={form.sqm}
                     onChange={(e) => setForm({ ...form, sqm: e.target.value })}
                     placeholder="80"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Monthly dues ($)</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">Monthly dues ($)</label>
                   <input
                     type="number"
                     value={form.monthlyDues}
                     onChange={(e) => setForm({ ...form, monthlyDues: e.target.value })}
                     min="0"
                     step="0.01"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
               {error && (
-                <p className="text-red-600 text-sm bg-red-50 px-3 py-2 rounded-lg">{error}</p>
+                <p className="text-red-400 text-sm bg-red-500/20 px-3 py-2 rounded-lg">{error}</p>
               )}
 
               <div className="flex gap-3 pt-1">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-4 py-2 border border-border text-foreground text-sm font-medium rounded-lg hover:bg-background transition-colors"
                 >
                   Cancel
                 </button>
@@ -333,18 +333,18 @@ export default function UnitsPage() {
       {/* Delete confirmation */}
       {deleteId && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-red-600 text-xl">🗑️</span>
+          <div className="bg-card rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
+            <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-red-400 text-xl">🗑️</span>
             </div>
-            <h2 className="text-lg font-bold text-gray-900 mb-2">Delete unit?</h2>
-            <p className="text-sm text-gray-500 mb-6">
+            <h2 className="text-lg font-bold text-foreground mb-2">Delete unit?</h2>
+            <p className="text-sm text-muted-foreground mb-6">
               This will also remove all linked payments and maintenance requests.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteId(null)}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50"
+                className="flex-1 px-4 py-2 border border-border text-foreground text-sm font-medium rounded-lg hover:bg-background"
               >
                 Cancel
               </button>

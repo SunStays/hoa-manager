@@ -18,10 +18,10 @@ const CATEGORIES = [
 ];
 
 const categoryBadge: Record<string, string> = {
-  security:  "bg-red-50 text-red-700",
-  utilities: "bg-blue-50 text-blue-700",
-  emergency: "bg-orange-50 text-orange-700",
-  general:   "bg-gray-100 text-gray-600",
+  security:  "bg-red-500/20 text-red-700",
+  utilities: "bg-accent text-primary",
+  emergency: "bg-orange-500/20 text-orange-400",
+  general:   "bg-secondary text-muted-foreground",
 };
 
 const emptyForm = { label: "", value: "", category: "general", note: "" };
@@ -111,8 +111,8 @@ export default function CodesPage() {
     <div>
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Important Codes & Numbers</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Gate codes, emergency numbers, utilities, and more</p>
+          <h1 className="text-2xl font-bold text-foreground">Important Codes & Numbers</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">Gate codes, emergency numbers, utilities, and more</p>
         </div>
         <button
           onClick={openAdd}
@@ -123,11 +123,11 @@ export default function CodesPage() {
       </div>
 
       {loading ? (
-        <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>
+        <div className="p-8 text-center text-muted-foreground text-sm">Loading...</div>
       ) : codes.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
+        <div className="bg-card rounded-xl border border-border p-12 text-center">
           <p className="text-3xl mb-3">🔑</p>
-          <p className="text-gray-500 text-sm mb-4">No codes or numbers saved yet.</p>
+          <p className="text-muted-foreground text-sm mb-4">No codes or numbers saved yet.</p>
           <button
             onClick={openAdd}
             className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
@@ -139,33 +139,33 @@ export default function CodesPage() {
         <div className="space-y-6">
           {grouped.map((group) => (
             <section key={group.value}>
-              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">{group.label}</h2>
+              <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">{group.label}</h2>
               <div className="space-y-2">
                 {group.items.map((c) => (
-                  <div key={c.id} className="bg-white rounded-xl border border-gray-100 px-5 py-4">
+                  <div key={c.id} className="bg-card rounded-xl border border-border px-5 py-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-semibold text-gray-900">{c.label}</span>
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${categoryBadge[c.category] ?? "bg-gray-100 text-gray-600"}`}>
+                          <span className="font-semibold text-foreground">{c.label}</span>
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${categoryBadge[c.category] ?? "bg-secondary text-muted-foreground"}`}>
                             {CATEGORIES.find((cat) => cat.value === c.category)?.label ?? c.category}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-lg font-bold text-gray-900 tracking-widest">
+                          <span className="font-mono text-lg font-bold text-foreground tracking-widest">
                             {revealed.has(c.id) ? c.value : "•".repeat(Math.min(c.value.length, 8))}
                           </span>
                           <button
                             onClick={() => toggleReveal(c.id)}
-                            className="text-xs text-blue-500 hover:underline"
+                            className="text-xs text-primary hover:underline"
                           >
                             {revealed.has(c.id) ? "Hide" : "Show"}
                           </button>
                         </div>
-                        {c.note && <p className="text-xs text-gray-400 mt-1">{c.note}</p>}
+                        {c.note && <p className="text-xs text-muted-foreground mt-1">{c.note}</p>}
                       </div>
                       <div className="flex gap-3 shrink-0 mt-0.5">
-                        <button onClick={() => openEdit(c)} className="text-xs font-medium text-blue-600 hover:underline">Edit</button>
+                        <button onClick={() => openEdit(c)} className="text-xs font-medium text-primary hover:underline">Edit</button>
                         <button onClick={() => setDeleteId(c.id)} className="text-xs font-medium text-red-400 hover:underline">Delete</button>
                       </div>
                     </div>
@@ -180,39 +180,39 @@ export default function CodesPage() {
       {/* Add / Edit modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-5">
+          <div className="bg-card rounded-2xl shadow-xl w-full max-w-md p-6">
+            <h2 className="text-lg font-bold text-foreground mb-5">
               {editCode ? "Edit entry" : "Add code or number"}
             </h2>
             <form onSubmit={handleSave} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Label *</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Label *</label>
                 <input
                   type="text"
                   value={form.label}
                   onChange={(e) => setForm({ ...form, label: e.target.value })}
                   required
                   placeholder="e.g. Gate Code, Pool Alarm"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Code / Number *</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Code / Number *</label>
                 <input
                   type="text"
                   value={form.value}
                   onChange={(e) => setForm({ ...form, value: e.target.value })}
                   required
                   placeholder="e.g. 1234 or +297 582 0000"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Category</label>
                 <select
                   value={form.category}
                   onChange={(e) => setForm({ ...form, category: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   {CATEGORIES.map((cat) => (
                     <option key={cat.value} value={cat.value}>{cat.label}</option>
@@ -220,18 +220,18 @@ export default function CodesPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Note <span className="text-gray-400 font-normal">(optional)</span></label>
+                <label className="block text-sm font-medium text-foreground mb-1">Note <span className="text-muted-foreground font-normal">(optional)</span></label>
                 <input
                   type="text"
                   value={form.note}
                   onChange={(e) => setForm({ ...form, note: e.target.value })}
                   placeholder="e.g. Only for residents, changes annually"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              {error && <p className="text-red-600 text-sm bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
+              {error && <p className="text-red-400 text-sm bg-red-500/20 px-3 py-2 rounded-lg">{error}</p>}
               <div className="flex gap-3 pt-1">
-                <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50">
+                <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-4 py-2 border border-border text-foreground text-sm font-medium rounded-lg hover:bg-background">
                   Cancel
                 </button>
                 <button type="submit" disabled={saving} className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50">
@@ -246,14 +246,14 @@ export default function CodesPage() {
       {/* Delete confirmation */}
       {deleteId && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-red-600 text-xl">🗑️</span>
+          <div className="bg-card rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
+            <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-red-400 text-xl">🗑️</span>
             </div>
-            <h2 className="text-lg font-bold text-gray-900 mb-2">Delete this entry?</h2>
-            <p className="text-sm text-gray-500 mb-6">This cannot be undone.</p>
+            <h2 className="text-lg font-bold text-foreground mb-2">Delete this entry?</h2>
+            <p className="text-sm text-muted-foreground mb-6">This cannot be undone.</p>
             <div className="flex gap-3">
-              <button onClick={() => setDeleteId(null)} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50">Cancel</button>
+              <button onClick={() => setDeleteId(null)} className="flex-1 px-4 py-2 border border-border text-foreground text-sm font-medium rounded-lg hover:bg-background">Cancel</button>
               <button onClick={() => handleDelete(deleteId)} className="flex-1 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700">Delete</button>
             </div>
           </div>

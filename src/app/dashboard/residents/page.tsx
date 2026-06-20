@@ -29,8 +29,8 @@ const roleLabel: Record<string, string> = {
 
 const roleBadge: Record<string, string> = {
   admin: "bg-purple-50 text-purple-700",
-  board: "bg-blue-50 text-blue-700",
-  resident: "bg-gray-100 text-gray-600",
+  board: "bg-accent text-primary",
+  resident: "bg-secondary text-muted-foreground",
 };
 
 export default function ResidentsPage() {
@@ -129,8 +129,8 @@ export default function ResidentsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Residents</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Manage all residents and board members</p>
+          <h1 className="text-2xl font-bold text-foreground">Residents</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">Manage all residents and board members</p>
         </div>
         <button onClick={openAdd} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
           + Add resident
@@ -144,18 +144,18 @@ export default function ResidentsPage() {
           { label: "Board members", value: boardCount },
           { label: "Residents", value: residentCount },
         ].map((s) => (
-          <div key={s.label} className="bg-white rounded-xl border border-gray-100 p-4">
-            <p className="text-sm text-gray-500">{s.label}</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{s.value}</p>
+          <div key={s.label} className="bg-card rounded-xl border border-border p-4">
+            <p className="text-sm text-muted-foreground">{s.label}</p>
+            <p className="text-2xl font-bold text-foreground mt-1">{s.value}</p>
           </div>
         ))}
       </div>
 
       {loading ? (
-        <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>
+        <div className="p-8 text-center text-muted-foreground text-sm">Loading...</div>
       ) : residents.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
-          <p className="text-gray-400 text-sm mb-3">No residents yet.</p>
+        <div className="bg-card rounded-xl border border-border p-12 text-center">
+          <p className="text-muted-foreground text-sm mb-3">No residents yet.</p>
           <button onClick={openAdd} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
             Add your first resident
           </button>
@@ -165,14 +165,14 @@ export default function ResidentsPage() {
           {/* Mobile cards */}
           <div className="md:hidden space-y-3">
             {residents.map((r) => (
-              <div key={r.id} className="bg-white rounded-xl border border-gray-100 p-4">
+              <div key={r.id} className="bg-card rounded-xl border border-border p-4">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div>
-                    <p className="font-semibold text-gray-900">{r.name}</p>
-                    <p className="text-sm text-gray-500">{r.email}</p>
-                    {r.phone && <p className="text-sm text-gray-500">{r.phone}</p>}
+                    <p className="font-semibold text-foreground">{r.name}</p>
+                    <p className="text-sm text-muted-foreground">{r.email}</p>
+                    {r.phone && <p className="text-sm text-muted-foreground">{r.phone}</p>}
                   </div>
-                  <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${roleBadge[r.role] ?? "bg-gray-100 text-gray-600"}`}>
+                  <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${roleBadge[r.role] ?? "bg-secondary text-muted-foreground"}`}>
                     {roleLabel[r.role] ?? r.role}
                   </span>
                 </div>
@@ -182,49 +182,49 @@ export default function ResidentsPage() {
                       .slice()
                       .sort((a, b) => parseInt(a.unitNumber) - parseInt(b.unitNumber))
                       .map((u) => (
-                        <span key={u.id} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                        <span key={u.id} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-secondary text-foreground">
                           #{u.unitNumber}
                         </span>
                       ))}
                   </div>
                 )}
-                <div className="flex gap-2 pt-1 border-t border-gray-50">
-                  <button onClick={() => openEdit(r)} className="flex-1 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">Edit</button>
-                  <button onClick={() => setDeleteId(r.id)} className="flex-1 py-1.5 text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg transition-colors">Delete</button>
+                <div className="flex gap-2 pt-1 border-t border-border">
+                  <button onClick={() => openEdit(r)} className="flex-1 py-1.5 text-sm font-medium text-primary hover:bg-accent rounded-lg transition-colors">Edit</button>
+                  <button onClick={() => setDeleteId(r.id)} className="flex-1 py-1.5 text-sm font-medium text-red-400 hover:bg-red-500/20 rounded-lg transition-colors">Delete</button>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Desktop table */}
-          <div className="hidden md:block bg-white rounded-xl border border-gray-100 overflow-hidden">
+          <div className="hidden md:block bg-card rounded-xl border border-border overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50">
-                  <th className="text-left px-5 py-3 font-medium text-gray-500">Name</th>
-                  <th className="text-left px-5 py-3 font-medium text-gray-500">Email</th>
-                  <th className="text-left px-5 py-3 font-medium text-gray-500">Phone</th>
-                  <th className="text-left px-5 py-3 font-medium text-gray-500">Units</th>
-                  <th className="text-left px-5 py-3 font-medium text-gray-500">Role</th>
+                <tr className="border-b border-border bg-background">
+                  <th className="text-left px-5 py-3 font-medium text-muted-foreground">Name</th>
+                  <th className="text-left px-5 py-3 font-medium text-muted-foreground">Email</th>
+                  <th className="text-left px-5 py-3 font-medium text-muted-foreground">Phone</th>
+                  <th className="text-left px-5 py-3 font-medium text-muted-foreground">Units</th>
+                  <th className="text-left px-5 py-3 font-medium text-muted-foreground">Role</th>
                   <th className="px-5 py-3"></th>
                 </tr>
               </thead>
               <tbody>
                 {residents.map((r) => (
-                  <tr key={r.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                    <td className="px-5 py-3.5 font-semibold text-gray-900">{r.name}</td>
-                    <td className="px-5 py-3.5 text-gray-600">{r.email}</td>
-                    <td className="px-5 py-3.5 text-gray-600">{r.phone || "—"}</td>
-                    <td className="px-5 py-3.5 text-gray-600">
+                  <tr key={r.id} className="border-b border-border hover:bg-background transition-colors">
+                    <td className="px-5 py-3.5 font-semibold text-foreground">{r.name}</td>
+                    <td className="px-5 py-3.5 text-muted-foreground">{r.email}</td>
+                    <td className="px-5 py-3.5 text-muted-foreground">{r.phone || "—"}</td>
+                    <td className="px-5 py-3.5 text-muted-foreground">
                       {r.units.length === 0 ? (
-                        <span className="text-gray-300">No unit</span>
+                        <span className="text-muted-foreground">No unit</span>
                       ) : (
                         <div className="flex flex-wrap gap-1">
                           {r.units
                             .slice()
                             .sort((a, b) => parseInt(a.unitNumber) - parseInt(b.unitNumber))
                             .map((u) => (
-                              <span key={u.id} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                              <span key={u.id} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-secondary text-foreground">
                                 #{u.unitNumber}
                               </span>
                             ))}
@@ -232,13 +232,13 @@ export default function ResidentsPage() {
                       )}
                     </td>
                     <td className="px-5 py-3.5">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${roleBadge[r.role] ?? "bg-gray-100 text-gray-600"}`}>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${roleBadge[r.role] ?? "bg-secondary text-muted-foreground"}`}>
                         {roleLabel[r.role] ?? r.role}
                       </span>
                     </td>
                     <td className="px-5 py-3.5 text-right">
-                      <button onClick={() => openEdit(r)} className="text-blue-600 hover:underline text-xs font-medium mr-3">Edit</button>
-                      <button onClick={() => setDeleteId(r.id)} className="text-red-500 hover:underline text-xs font-medium">Delete</button>
+                      <button onClick={() => openEdit(r)} className="text-primary hover:underline text-xs font-medium mr-3">Edit</button>
+                      <button onClick={() => setDeleteId(r.id)} className="text-red-400 hover:underline text-xs font-medium">Delete</button>
                     </td>
                   </tr>
                 ))}
@@ -251,49 +251,49 @@ export default function ResidentsPage() {
       {/* Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-bold text-gray-900 mb-5">
+          <div className="bg-card rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-lg font-bold text-foreground mb-5">
               {editResident ? `Edit ${editResident.name}` : "Add resident"}
             </h2>
             <form onSubmit={handleSave} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full name *</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Full name *</label>
                 <input
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   required
                   placeholder="e.g. Maria Bosman"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Email *</label>
                 <input
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   required
                   placeholder="maria@example.com"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Phone</label>
                 <input
                   type="tel"
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
                   placeholder="+297 700 0000"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Role</label>
                 <select
                   value={form.role}
                   onChange={(e) => setForm({ ...form, role: e.target.value as "resident" | "board" | "admin" })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="resident">Resident</option>
                   <option value="board">Board member</option>
@@ -302,22 +302,22 @@ export default function ResidentsPage() {
               </div>
               {!editResident && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Password <span className="text-gray-400 font-normal">(optional — lets them log in)</span>
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Password <span className="text-muted-foreground font-normal">(optional — lets them log in)</span>
                   </label>
                   <input
                     type="password"
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
                     placeholder="Min. 6 characters"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Units owned</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Units owned</label>
                 {units.length === 0 ? (
-                  <p className="text-sm text-gray-400">No units yet — add units first.</p>
+                  <p className="text-sm text-muted-foreground">No units yet — add units first.</p>
                 ) : (
                   <div className="grid grid-cols-4 gap-2 max-h-40 overflow-y-auto pr-1">
                     {units.map((u) => {
@@ -330,7 +330,7 @@ export default function ResidentsPage() {
                           className={`px-2 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                             selected
                               ? "bg-blue-600 text-white border-blue-600"
-                              : "bg-white text-gray-700 border-gray-300 hover:border-blue-400"
+                              : "bg-card text-foreground border-border hover:border-blue-400"
                           }`}
                         >
                           #{u.unitNumber}
@@ -341,10 +341,10 @@ export default function ResidentsPage() {
                 )}
               </div>
 
-              {error && <p className="text-red-600 text-sm bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
+              {error && <p className="text-red-400 text-sm bg-red-500/20 px-3 py-2 rounded-lg">{error}</p>}
 
               <div className="flex gap-3 pt-1">
-                <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
+                <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-4 py-2 border border-border text-foreground text-sm font-medium rounded-lg hover:bg-background transition-colors">
                   Cancel
                 </button>
                 <button type="submit" disabled={saving} className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50">
@@ -359,14 +359,14 @@ export default function ResidentsPage() {
       {/* Delete confirmation */}
       {deleteId && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-red-600 text-xl">🗑️</span>
+          <div className="bg-card rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
+            <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-red-400 text-xl">🗑️</span>
             </div>
-            <h2 className="text-lg font-bold text-gray-900 mb-2">Remove resident?</h2>
-            <p className="text-sm text-gray-500 mb-6">This will remove them from the community. Their payment history will remain.</p>
+            <h2 className="text-lg font-bold text-foreground mb-2">Remove resident?</h2>
+            <p className="text-sm text-muted-foreground mb-6">This will remove them from the community. Their payment history will remain.</p>
             <div className="flex gap-3">
-              <button onClick={() => setDeleteId(null)} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50">Cancel</button>
+              <button onClick={() => setDeleteId(null)} className="flex-1 px-4 py-2 border border-border text-foreground text-sm font-medium rounded-lg hover:bg-background">Cancel</button>
               <button onClick={() => handleDelete(deleteId)} className="flex-1 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700">Remove</button>
             </div>
           </div>

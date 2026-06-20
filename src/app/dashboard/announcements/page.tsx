@@ -147,8 +147,8 @@ export default function AnnouncementsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Announcements</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Board messages to the community</p>
+          <h1 className="text-2xl font-bold text-foreground">Announcements</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">Board messages to the community</p>
         </div>
         {isBoard && (
           <button onClick={openNew} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
@@ -158,11 +158,11 @@ export default function AnnouncementsPage() {
       </div>
 
       {loading ? (
-        <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>
+        <div className="p-8 text-center text-muted-foreground text-sm">Loading...</div>
       ) : announcements.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center">
+        <div className="bg-card rounded-2xl border border-border p-16 text-center">
           <p className="text-4xl mb-3">📢</p>
-          <p className="text-gray-500 text-sm mb-4">No announcements yet.</p>
+          <p className="text-muted-foreground text-sm mb-4">No announcements yet.</p>
           {isBoard && (
             <button onClick={openNew} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
               Post your first announcement
@@ -179,50 +179,50 @@ export default function AnnouncementsPage() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-bold text-gray-900 mb-5">
+          <div className="bg-card rounded-2xl shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-lg font-bold text-foreground mb-5">
               {editItem ? "Edit announcement" : "New announcement"}
             </h2>
             <form onSubmit={handleSave} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Subject *</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Subject *</label>
                 <input
                   type="text"
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   required
                   placeholder="e.g. Pool maintenance scheduled for Saturday"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Message *</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Message *</label>
                 <textarea
                   value={form.body}
                   onChange={(e) => setForm({ ...form, body: e.target.value })}
                   required
                   rows={6}
                   placeholder="Write your message to residents here..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 />
               </div>
 
               {/* Attachments — only for new announcements */}
               {!editItem && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Attachments</label>
+                  <label className="block text-sm font-medium text-foreground mb-2">Attachments</label>
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={() => fileRef.current?.click()}
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-3 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-600 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-3 border-2 border-dashed border-border rounded-xl text-sm text-muted-foreground hover:border-blue-400 hover:bg-accent transition-colors"
                     >
                       📎 Browse files
                     </button>
                     <button
                       type="button"
                       onClick={() => cameraRef.current?.click()}
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-3 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-600 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-3 border-2 border-dashed border-border rounded-xl text-sm text-muted-foreground hover:border-blue-400 hover:bg-accent transition-colors"
                     >
                       📷 Take photo
                     </button>
@@ -232,9 +232,9 @@ export default function AnnouncementsPage() {
                   {files.length > 0 && (
                     <ul className="mt-2 space-y-1">
                       {files.map((f, i) => (
-                        <li key={i} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-1.5 text-xs text-gray-600">
+                        <li key={i} className="flex items-center justify-between bg-background rounded-lg px-3 py-1.5 text-xs text-muted-foreground">
                           <span>📄 {f.name}</span>
-                          <button type="button" onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600 ml-2">✕</button>
+                          <button type="button" onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-400 ml-2">✕</button>
                         </li>
                       ))}
                     </ul>
@@ -247,22 +247,22 @@ export default function AnnouncementsPage() {
                   type="checkbox"
                   checked={form.pinned}
                   onChange={(e) => setForm({ ...form, pinned: e.target.checked })}
-                  className="w-4 h-4 rounded border-gray-300 text-blue-600"
+                  className="w-4 h-4 rounded border-border text-primary"
                 />
-                <span className="text-sm text-gray-700">📌 Pin this announcement to the top</span>
+                <span className="text-sm text-foreground">📌 Pin this announcement to the top</span>
               </label>
 
-              {error && <p className="text-red-600 text-sm bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
-              {testSent && <p className="text-green-700 text-sm bg-green-50 px-3 py-2 rounded-lg">✅ Test email sent to your inbox!</p>}
+              {error && <p className="text-red-400 text-sm bg-red-500/20 px-3 py-2 rounded-lg">{error}</p>}
+              {testSent && <p className="text-green-400 text-sm bg-green-500/20 px-3 py-2 rounded-lg">✅ Test email sent to your inbox!</p>}
 
               {!editItem && (
-                <button type="button" onClick={sendTestEmail} disabled={sendingTest} className="w-full px-4 py-2 border border-gray-300 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50">
+                <button type="button" onClick={sendTestEmail} disabled={sendingTest} className="w-full px-4 py-2 border border-border text-muted-foreground text-sm font-medium rounded-lg hover:bg-background transition-colors disabled:opacity-50">
                   {sendingTest ? "Sending test..." : "📧 Send test email to me"}
                 </button>
               )}
 
               <div className="flex gap-3">
-                <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
+                <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-4 py-2 border border-border text-foreground text-sm font-medium rounded-lg hover:bg-background transition-colors">
                   Cancel
                 </button>
                 <button type="submit" disabled={saving} className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50">
@@ -277,14 +277,14 @@ export default function AnnouncementsPage() {
       {/* Delete confirmation */}
       {deleteId && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-red-600 text-xl">🗑️</span>
+          <div className="bg-card rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
+            <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-red-400 text-xl">🗑️</span>
             </div>
-            <h2 className="text-lg font-bold text-gray-900 mb-2">Delete announcement?</h2>
-            <p className="text-sm text-gray-500 mb-6">This cannot be undone.</p>
+            <h2 className="text-lg font-bold text-foreground mb-2">Delete announcement?</h2>
+            <p className="text-sm text-muted-foreground mb-6">This cannot be undone.</p>
             <div className="flex gap-3">
-              <button onClick={() => setDeleteId(null)} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50">Cancel</button>
+              <button onClick={() => setDeleteId(null)} className="flex-1 px-4 py-2 border border-border text-foreground text-sm font-medium rounded-lg hover:bg-background">Cancel</button>
               <button onClick={() => handleDelete(deleteId)} className="flex-1 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700">Delete</button>
             </div>
           </div>
@@ -302,33 +302,33 @@ function AnnouncementCard({ a, isBoard, onEdit, onDelete, onTogglePin }: {
   onTogglePin: (a: Announcement) => void;
 }) {
   return (
-    <div className={`bg-white rounded-2xl border p-5 ${a.pinned ? "border-blue-200 shadow-sm" : "border-gray-100"}`}>
+    <div className={`bg-card rounded-2xl border p-5 ${a.pinned ? "border-blue-200 shadow-sm" : "border-border"}`}>
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
-            {a.pinned && <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">📌 Pinned</span>}
-            <h3 className="text-base font-bold text-gray-900">{a.title}</h3>
+            {a.pinned && <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-accent text-primary">📌 Pinned</span>}
+            <h3 className="text-base font-bold text-foreground">{a.title}</h3>
           </div>
-          <p className="text-sm text-gray-600 whitespace-pre-wrap leading-relaxed">{a.body}</p>
+          <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{a.body}</p>
           {a.attachments?.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-2">
               {a.attachments.map((url) => (
                 <a key={url} href={url} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-gray-50 border border-gray-200 text-xs text-gray-600 hover:text-blue-600 hover:border-blue-300 transition-colors">
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-background border border-border text-xs text-muted-foreground hover:text-primary hover:border-blue-300 transition-colors">
                   📎 {fileName(url)}
                 </a>
               ))}
             </div>
           )}
-          <p className="text-xs text-gray-400 mt-3">
-            Posted by <span className="font-medium text-gray-500">{a.author.name}</span> · {formatDate(a.publishedAt)}
+          <p className="text-xs text-muted-foreground mt-3">
+            Posted by <span className="font-medium text-muted-foreground">{a.author.name}</span> · {formatDate(a.publishedAt)}
           </p>
         </div>
         {isBoard && (
           <div className="flex items-center gap-1 shrink-0">
-            <button onClick={() => onTogglePin(a)} title={a.pinned ? "Unpin" : "Pin to top"} className="p-1.5 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm">📌</button>
-            <button onClick={() => onEdit(a)} className="p-1.5 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-xs font-medium">Edit</button>
-            <button onClick={() => onDelete(a.id)} className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors text-xs font-medium">Delete</button>
+            <button onClick={() => onTogglePin(a)} title={a.pinned ? "Unpin" : "Pin to top"} className="p-1.5 text-muted-foreground hover:text-primary rounded-lg hover:bg-accent transition-colors text-sm">📌</button>
+            <button onClick={() => onEdit(a)} className="p-1.5 text-muted-foreground hover:text-primary rounded-lg hover:bg-accent transition-colors text-xs font-medium">Edit</button>
+            <button onClick={() => onDelete(a.id)} className="p-1.5 text-muted-foreground hover:text-red-400 rounded-lg hover:bg-red-500/20 transition-colors text-xs font-medium">Delete</button>
           </div>
         )}
       </div>
