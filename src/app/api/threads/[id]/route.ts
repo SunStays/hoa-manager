@@ -28,3 +28,22 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   return NextResponse.json(thread);
 }
+
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const session = await auth();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const isBoard = session.user.role === "board" || session.user.role === "admin";
+  if (!isBoard) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  const { id } = await params;
+
+  const thread = await db.thread.findFirst({
+    where: { id, communityId: session.user.communityId },
+  });
+  if (!thread) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  await db.thread.delete({ where: { id } });
+
+  return NextResponse.json({ ok: true });
+}

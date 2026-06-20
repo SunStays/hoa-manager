@@ -33,57 +33,83 @@ function ConversationPane({
   thread,
   myId,
   onMessageSent,
+  onDelete,
 }: {
   thread: Thread;
   myId: string;
   onMessageSent: (msg: Message) => void;
+  onDelete?: () => void;
 }) {
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "instant" });
+  }, [thread.id]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [thread.messages]);
-
-  useEffect(() => {
-    fetch(`/api/threads/${thread.id}/read`, { method: "POST" });
-  }, [thread.id]);
+  }, [thread.messages.length]);
 
   async function send() {
-    if (!body.trim() || sending) return;
+    const text = body.trim();
+    if (!text || sending) return;
     setSending(true);
-    const res = await fetch(`/api/threads/${thread.id}/messages`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ body }),
-    });
-    if (res.ok) {
-      const msg = await res.json();
-      onMessageSent(msg);
-      setBody("");
+    setError("");
+    try {
+      const res = await fetch(`/api/threads/${thread.id}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body: text }),
+      });
+      if (res.ok) {
+        const msg = await res.json();
+        onMessageSent(msg);
+        setBody("");
+        if (textareaRef.current) textareaRef.current.style.height = "auto";
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error ?? "Failed to send. Try again.");
+      }
+    } catch {
+      setError("Network error. Try again.");
     }
     setSending(false);
   }
 
   return (
     <div className="flex flex-col h-full">
-      <div className="px-5 py-4 border-b border-border shrink-0">
-        <p className="font-semibold text-foreground">{thread.resident.name}</p>
-        <p className="text-xs text-muted-foreground capitalize">{thread.resident.role}</p>
+      <div className="px-5 py-3.5 border-b border-border shrink-0 flex items-center justify-between">
+        <div>
+          <p className="font-semibold text-foreground">{thread.resident.name}</p>
+          <p className="text-xs text-muted-foreground capitalize">{thread.resident.role}</p>
+        </div>
+        {onDelete && (
+          <button
+            onClick={onDelete}
+            className="text-xs text-red-400 hover:text-red-300 px-2 py-1 rounded hover:bg-secondary transition-colors"
+          >
+            Delete conversation
+          </button>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         {thread.messages.length === 0 && (
-          <p className="text-center text-sm text-muted-foreground py-8">No messages yet. Start the conversation.</p>
+          <p className="text-center text-sm text-muted-foreground py-8">
+            No messages yet. Start the conversation.
+          </p>
         )}
         {thread.messages.map((m) => {
           const isMe = m.senderId === myId;
           return (
             <div key={m.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[75%] ${isMe ? "items-end" : "items-start"} flex flex-col gap-0.5`}>
+              <div className={`max-w-[75%] flex flex-col gap-0.5 ${isMe ? "items-end" : "items-start"}`}>
                 {!isMe && (
-                  <span className="text-xs text-muted-foreground px-1">{m.sender.name}</span>
+                  <span className="text-xs text-muted-foreground px-1">{m.sender?.name ?? ""}</span>
                 )}
                 <div
                   className={`px-3.5 py-2 rounded-2xl text-sm leading-relaxed ${
@@ -103,17 +129,21 @@ function ConversationPane({
       </div>
 
       <div className="px-4 py-3 border-t border-border shrink-0">
+        {error && <p className="text-xs text-red-400 mb-2">{error}</p>}
         <div className="flex gap-2 items-end">
           <textarea
+            ref={textareaRef}
             value={body}
             onChange={(e) => setBody(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                send();
+              }
             }}
             placeholder="Type a message…"
             rows={1}
             className="flex-1 resize-none rounded-xl border border-border bg-background text-foreground text-sm px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/40 min-h-[40px] max-h-32"
-            style={{ height: "auto" }}
             onInput={(e) => {
               const t = e.currentTarget;
               t.style.height = "auto";
@@ -125,9 +155,15 @@ function ConversationPane({
             disabled={!body.trim() || sending}
             className="shrink-0 w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-40 hover:opacity-90 transition-opacity"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-            </svg>
+            {sending ? (
+              <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+              </svg>
+            )}
           </button>
         </div>
       </div>
@@ -140,6 +176,8 @@ export default function MessagesPage() {
   const [role, setRole] = useState<string | null>(null);
   const [threads, setThreads] = useState<Thread[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [openThread, setOpenThread] = useState<Thread | null>(null);
+  const [loadingThread, setLoadingThread] = useState(false);
   const [residents, setResidents] = useState<Sender[]>([]);
   const [showPicker, setShowPicker] = useState(false);
   const [residentThread, setResidentThread] = useState<Thread | null>(null);
@@ -151,7 +189,6 @@ export default function MessagesPage() {
       .then((me) => {
         setMyId(me.id);
         setRole(me.role);
-
         const isBoard = me.role === "board" || me.role === "admin";
         if (isBoard) {
           fetch("/api/threads")
@@ -168,8 +205,18 @@ export default function MessagesPage() {
       });
   }, []);
 
+  // Fetch full thread (all messages + senders) when selection changes
+  useEffect(() => {
+    if (!selectedId) { setOpenThread(null); return; }
+    setLoadingThread(true);
+    fetch(`/api/threads/${selectedId}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => { setOpenThread(data); setLoadingThread(false); });
+    fetch(`/api/threads/${selectedId}/read`, { method: "POST" });
+    setThreads((prev) => prev.map((t) => t.id === selectedId ? { ...t, unreadCount: 0 } : t));
+  }, [selectedId]);
+
   const isBoard = role === "board" || role === "admin";
-  const selected = threads.find((t) => t.id === selectedId) ?? null;
 
   async function startThread(residentId: string) {
     const res = await fetch("/api/threads", {
@@ -189,15 +236,22 @@ export default function MessagesPage() {
   }
 
   async function startResidentThread() {
-    const res = await fetch("/api/threads", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
+    const res = await fetch("/api/threads", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
     if (res.ok) setResidentThread(await res.json());
   }
 
-  function handleMessageSent(threadId: string, msg: Message) {
+  function handleMessageSent(msg: Message) {
     if (isBoard) {
+      setOpenThread((prev) => prev ? { ...prev, messages: [...prev.messages, msg] } : prev);
       setThreads((prev) =>
         prev.map((t) =>
-          t.id === threadId ? { ...t, messages: [...t.messages, msg] } : t
+          t.id === selectedId
+            ? { ...t, messages: [{ ...msg, sender: undefined as unknown as Sender }] }
+            : t
         )
       );
     } else {
@@ -205,9 +259,14 @@ export default function MessagesPage() {
     }
   }
 
-  function selectThread(id: string) {
-    setSelectedId(id);
-    setThreads((prev) => prev.map((t) => t.id === id ? { ...t, unreadCount: 0 } : t));
+  async function deleteThread(id: string) {
+    if (!confirm("Delete this conversation and all its messages?")) return;
+    const res = await fetch(`/api/threads/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      setThreads((prev) => prev.filter((t) => t.id !== id));
+      setSelectedId(null);
+      setOpenThread(null);
+    }
   }
 
   if (loading) {
@@ -224,7 +283,7 @@ export default function MessagesPage() {
             <ConversationPane
               thread={residentThread}
               myId={myId!}
-              onMessageSent={(msg) => handleMessageSent(residentThread.id, msg)}
+              onMessageSent={handleMessageSent}
             />
           ) : (
             <div className="flex flex-col items-center justify-center h-full gap-4 text-muted-foreground">
@@ -304,7 +363,7 @@ export default function MessagesPage() {
                 return (
                   <button
                     key={t.id}
-                    onClick={() => selectThread(t.id)}
+                    onClick={() => setSelectedId(t.id)}
                     className={`w-full text-left px-4 py-3.5 border-b border-border transition-colors ${
                       isActive ? "bg-accent" : "hover:bg-secondary"
                     }`}
@@ -332,12 +391,15 @@ export default function MessagesPage() {
 
         {/* Conversation pane */}
         <div className="flex-1 min-w-0">
-          {selected ? (
+          {loadingThread ? (
+            <div className="flex items-center justify-center h-full text-muted-foreground text-sm">Loading…</div>
+          ) : openThread ? (
             <ConversationPane
-              key={selected.id}
-              thread={selected}
+              key={openThread.id}
+              thread={openThread}
               myId={myId!}
-              onMessageSent={(msg) => handleMessageSent(selected.id, msg)}
+              onMessageSent={handleMessageSent}
+              onDelete={() => deleteThread(openThread.id)}
             />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-2">
