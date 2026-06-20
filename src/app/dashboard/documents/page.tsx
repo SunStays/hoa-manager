@@ -53,6 +53,7 @@ export default function DocumentsPage() {
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   const onDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -281,41 +282,33 @@ export default function DocumentsPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">File *</label>
-                <div
-                  onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-                  onDragLeave={() => setDragging(false)}
-                  onDrop={onDrop}
-                  onClick={() => fileRef.current?.click()}
-                  className={`relative flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-8 cursor-pointer transition-colors ${
-                    dragging
-                      ? "border-blue-500 bg-blue-50"
-                      : file
-                      ? "border-green-400 bg-green-50"
-                      : "border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50"
-                  }`}
-                >
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    accept="*/*"
-                    onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                    className="hidden"
-                  />
-                  {file ? (
-                    <>
-                      <span className="text-2xl">✅</span>
-                      <p className="text-sm font-medium text-green-700">{file.name}</p>
-                      <p className="text-xs text-green-600">{formatBytes(file.size)} — click to change</p>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-3xl">📂</span>
-                      <p className="text-sm font-medium text-gray-700">Drag & drop a file here</p>
-                      <p className="text-xs text-gray-400">or click to browse</p>
-                      <p className="text-xs text-gray-300 mt-1">Any file type — max 10 MB</p>
-                    </>
-                  )}
+                <div className="flex gap-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-600 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                  >
+                    📂 Browse file
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => cameraRef.current?.click()}
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-600 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                  >
+                    📷 Take photo
+                  </button>
                 </div>
+                <input ref={fileRef} type="file" accept="*/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="hidden" />
+                <input ref={cameraRef} type="file" accept="image/*" capture="environment" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="hidden" />
+                {file && (
+                  <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                    <div>
+                      <p className="text-sm font-medium text-green-700">{file.name}</p>
+                      <p className="text-xs text-green-600">{formatBytes(file.size)}</p>
+                    </div>
+                    <button type="button" onClick={() => setFile(null)} className="text-green-500 hover:text-green-700 text-lg leading-none">✕</button>
+                  </div>
+                )}
               </div>
               {uploadError && <p className="text-red-600 text-sm bg-red-50 px-3 py-2 rounded-lg">{uploadError}</p>}
               <div className="flex gap-3 pt-1">

@@ -39,6 +39,7 @@ export default function AnnouncementsPage() {
   const [error, setError] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   async function load() {
     const res = await fetch("/api/announcements");
@@ -197,19 +198,24 @@ export default function AnnouncementsPage() {
               {!editItem && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Attachments</label>
-                  <div
-                    onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-                    onDragLeave={() => setDragging(false)}
-                    onDrop={onDrop}
-                    onClick={() => fileRef.current?.click()}
-                    className={`flex flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed px-4 py-5 cursor-pointer transition-colors ${
-                      dragging ? "border-blue-500 bg-blue-50" : "border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50"
-                    }`}
-                  >
-                    <input ref={fileRef} type="file" accept="*/*" multiple onChange={(e) => setFiles((prev) => [...prev, ...Array.from(e.target.files ?? [])])} className="hidden" />
-                    <span className="text-xl">📎</span>
-                    <p className="text-xs text-gray-500">Drag & drop files or click to browse</p>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => fileRef.current?.click()}
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-3 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-600 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                    >
+                      📎 Browse files
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => cameraRef.current?.click()}
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-3 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-600 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                    >
+                      📷 Take photo
+                    </button>
                   </div>
+                  <input ref={fileRef} type="file" accept="*/*" multiple onChange={(e) => setFiles((prev) => [...prev, ...Array.from(e.target.files ?? [])])} className="hidden" />
+                  <input ref={cameraRef} type="file" accept="image/*" capture="environment" onChange={(e) => { if (e.target.files?.[0]) setFiles((prev) => [...prev, e.target.files![0]]); }} className="hidden" />
                   {files.length > 0 && (
                     <ul className="mt-2 space-y-1">
                       {files.map((f, i) => (
