@@ -14,11 +14,12 @@ function detectDevice(): Device {
 
 const steps: Record<Device, { icon: string; text: string }[]> = {
   iphone: [
-    { icon: "🌐", text: 'Open this page in Safari (the blue compass app)' },
-    { icon: "⬆️", text: 'Tap the Share button at the bottom of the screen' },
-    { icon: "👇", text: 'Scroll down and tap "Add to Home Screen"' },
+    { icon: "🧭", text: 'Open the Safari app — it looks like a blue compass. Chrome does NOT work on iPhone for this!' },
+    { icon: "🔗", text: 'Type this in Safari: hoa-manager-phi.vercel.app' },
+    { icon: "⬆️", text: 'Tap the Share button — the box with an arrow pointing up, at the bottom of the screen' },
+    { icon: "👇", text: 'Scroll down in the menu and tap "Add to Home Screen"' },
     { icon: "✅", text: 'Tap "Add" in the top right corner' },
-    { icon: "🎉", text: 'Done! The app is now on your home screen' },
+    { icon: "🎉", text: 'Done! The app icon is now on your home screen' },
   ],
   android: [
     { icon: "🌐", text: 'Open this page in Chrome (the colourful circle app)' },
