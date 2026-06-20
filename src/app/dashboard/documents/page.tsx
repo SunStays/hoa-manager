@@ -65,12 +65,17 @@ export default function DocumentsPage() {
   }, []);
 
   async function loadDocuments() {
-    const [docsRes, meRes] = await Promise.all([fetch("/api/documents"), fetch("/api/me")]);
-    const data = await docsRes.json();
-    const me = await meRes.json();
-    setDocuments(Array.isArray(data) ? data : []);
-    setRole(me?.role ?? null);
-    setLoading(false);
+    try {
+      const [docsRes, meRes] = await Promise.all([fetch("/api/documents"), fetch("/api/me")]);
+      const data = await docsRes.json();
+      const me = await meRes.json();
+      setDocuments(Array.isArray(data) ? data : []);
+      setRole(me?.role ?? null);
+    } catch {
+      setDocuments([]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { loadDocuments(); }, []);

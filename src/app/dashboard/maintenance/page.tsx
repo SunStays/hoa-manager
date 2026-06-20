@@ -56,18 +56,24 @@ export default function MaintenancePage() {
   const [postingUpdate, setPostingUpdate] = useState(false);
 
   async function load() {
-    const [mRes, uRes, meRes] = await Promise.all([
-      fetch("/api/maintenance"),
-      fetch("/api/units/mine"),
-      fetch("/api/me"),
-    ]);
-    const mData = await mRes.json();
-    const uData = await uRes.json();
-    const meData = await meRes.json();
-    setRequests(Array.isArray(mData) ? mData : []);
-    setUnits(Array.isArray(uData) ? uData : []);
-    setRole(meData?.role ?? null);
-    setLoading(false);
+    try {
+      const [mRes, uRes, meRes] = await Promise.all([
+        fetch("/api/maintenance"),
+        fetch("/api/units/mine"),
+        fetch("/api/me"),
+      ]);
+      const mData = await mRes.json();
+      const uData = await uRes.json();
+      const meData = await meRes.json();
+      setRequests(Array.isArray(mData) ? mData : []);
+      setUnits(Array.isArray(uData) ? uData : []);
+      setRole(meData?.role ?? null);
+    } catch {
+      setRequests([]);
+      setUnits([]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);

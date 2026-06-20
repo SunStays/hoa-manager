@@ -38,10 +38,15 @@ export default function CodesPage() {
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
 
   async function load() {
-    const res = await fetch("/api/codes");
-    const data = await res.json();
-    setCodes(Array.isArray(data) ? data : []);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/codes");
+      const data = await res.json();
+      setCodes(Array.isArray(data) ? data : []);
+    } catch {
+      setCodes([]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);

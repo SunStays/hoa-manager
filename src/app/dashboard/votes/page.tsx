@@ -46,18 +46,24 @@ export default function VotesPage() {
   const [formError, setFormError] = useState("");
 
   async function load() {
-    const [vRes, uRes, sRes] = await Promise.all([
-      fetch("/api/votes"),
-      fetch("/api/units/mine"),
-      fetch("/api/auth/session"),
-    ]);
-    const vData = await vRes.json();
-    const uData = await uRes.json();
-    const sData = await sRes.json();
-    setVotes(Array.isArray(vData) ? vData : []);
-    setMyUnits(Array.isArray(uData) ? uData : []);
-    setRole(sData?.user?.role ?? "");
-    setLoading(false);
+    try {
+      const [vRes, uRes, sRes] = await Promise.all([
+        fetch("/api/votes"),
+        fetch("/api/units/mine"),
+        fetch("/api/auth/session"),
+      ]);
+      const vData = await vRes.json();
+      const uData = await uRes.json();
+      const sData = await sRes.json();
+      setVotes(Array.isArray(vData) ? vData : []);
+      setMyUnits(Array.isArray(uData) ? uData : []);
+      setRole(sData?.user?.role ?? "");
+    } catch {
+      setVotes([]);
+      setMyUnits([]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);

@@ -44,12 +44,17 @@ export default function AnnouncementsPage() {
   const cameraRef = useRef<HTMLInputElement>(null);
 
   async function load() {
-    const [annRes, meRes] = await Promise.all([fetch("/api/announcements"), fetch("/api/me")]);
-    const data = await annRes.json();
-    const me = await meRes.json();
-    setAnnouncements(Array.isArray(data) ? data : []);
-    setRole(me?.role ?? null);
-    setLoading(false);
+    try {
+      const [annRes, meRes] = await Promise.all([fetch("/api/announcements"), fetch("/api/me")]);
+      const data = await annRes.json();
+      const me = await meRes.json();
+      setAnnouncements(Array.isArray(data) ? data : []);
+      setRole(me?.role ?? null);
+    } catch {
+      setAnnouncements([]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { load(); }, []);
