@@ -71,11 +71,12 @@ export async function POST(req: NextRequest) {
     residentId = body.residentId;
     if (!residentId) return NextResponse.json({ error: "residentId required" }, { status: 400 });
 
-    // Verify resident belongs to same community
+    // Verify user belongs to same community and isn't the current user
+    if (residentId === session.user.id) return NextResponse.json({ error: "Cannot message yourself" }, { status: 400 });
     const resident = await db.user.findFirst({
-      where: { id: residentId, communityId: session.user.communityId, role: "resident" },
+      where: { id: residentId, communityId: session.user.communityId },
     });
-    if (!resident) return NextResponse.json({ error: "Resident not found" }, { status: 404 });
+    if (!resident) return NextResponse.json({ error: "User not found" }, { status: 404 });
   } else {
     residentId = session.user.id;
   }

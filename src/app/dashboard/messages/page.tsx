@@ -159,7 +159,7 @@ export default function MessagesPage() {
             .then((data) => { setThreads(Array.isArray(data) ? data : []); setLoading(false); });
           fetch("/api/residents")
             .then((r) => r.json())
-            .then((data) => setResidents(Array.isArray(data) ? data.filter((u: Sender) => u.role === "resident") : []));
+            .then((data) => setResidents(Array.isArray(data) ? data.filter((u: Sender) => u.id !== me.id) : []));
         } else {
           fetch("/api/threads")
             .then((r) => r.json())
@@ -262,9 +262,9 @@ export default function MessagesPage() {
       {showPicker && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-card rounded-xl border border-border p-5 w-80 shadow-xl">
-            <h2 className="font-semibold text-foreground mb-3">Select resident</h2>
+            <h2 className="font-semibold text-foreground mb-3">Select person</h2>
             {pickerResidents.length === 0 ? (
-              <p className="text-sm text-muted-foreground">All residents already have a conversation.</p>
+              <p className="text-sm text-muted-foreground">Everyone already has a conversation.</p>
             ) : (
               <ul className="space-y-1 max-h-64 overflow-y-auto">
                 {pickerResidents.map((r) => (
