@@ -399,7 +399,7 @@ export default function MessagesPage() {
               thread={openThread}
               myId={myId!}
               onMessageSent={handleMessageSent}
-              onDelete={() => deleteThread(openThread.id)}
+              onDelete={role === "admin" ? () => deleteThread(openThread.id) : undefined}
             />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-2">

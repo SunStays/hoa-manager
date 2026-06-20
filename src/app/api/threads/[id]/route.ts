@@ -33,8 +33,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const isBoard = session.user.role === "board" || session.user.role === "admin";
-  if (!isBoard) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (session.user.role !== "admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { id } = await params;
 
