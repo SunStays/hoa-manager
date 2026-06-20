@@ -39,6 +39,8 @@ function formatDate(iso: string) {
 }
 
 export default function DocumentsPage() {
+  const [role, setRole] = useState<string | null>(null);
+  const isBoard = role === "board" || role === "admin";
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentFolder, setCurrentFolder] = useState<string | null>(null);
@@ -63,9 +65,11 @@ export default function DocumentsPage() {
   }, []);
 
   async function loadDocuments() {
-    const res = await fetch("/api/documents");
-    const data = await res.json();
+    const [docsRes, meRes] = await Promise.all([fetch("/api/documents"), fetch("/api/me")]);
+    const data = await docsRes.json();
+    const me = await meRes.json();
     setDocuments(Array.isArray(data) ? data : []);
+    setRole(me?.role ?? null);
     setLoading(false);
   }
 
@@ -199,12 +203,14 @@ export default function DocumentsPage() {
           <span className="text-gray-200">/</span>
           <h1 className="text-lg font-bold text-gray-900">{currentYear}</h1>
         </div>
-        <button
-          onClick={openUpload}
-          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          + Upload document
-        </button>
+        {isBoard && (
+          <button
+            onClick={openUpload}
+            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            + Upload document
+          </button>
+        )}
       </div>
 
       {/* Document list */}
@@ -212,9 +218,11 @@ export default function DocumentsPage() {
         {yearDocs.length === 0 ? (
           <div className="p-12 text-center">
             <p className="text-gray-400 text-sm mb-3">No documents in {folder?.label} / {currentYear} yet.</p>
-            <button onClick={openUpload} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
-              Upload first document
-            </button>
+            {isBoard && (
+              <button onClick={openUpload} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                Upload first document
+              </button>
+            )}
           </div>
         ) : (
           <table className="w-full text-sm">
@@ -240,7 +248,7 @@ export default function DocumentsPage() {
                   <td className="px-5 py-3.5 text-gray-500">{formatDate(doc.createdAt)}</td>
                   <td className="px-5 py-3.5 text-right whitespace-nowrap">
                     <a href={`/api/documents/${doc.id}/download`} className="text-blue-600 hover:underline text-xs font-medium mr-3">Download</a>
-                    <button onClick={() => setDeleteId(doc.id)} className="text-red-500 hover:underline text-xs font-medium">Delete</button>
+                    {isBoard && <button onClick={() => setDeleteId(doc.id)} className="text-red-500 hover:underline text-xs font-medium">Delete</button>}
                   </td>
                 </tr>
               ))}

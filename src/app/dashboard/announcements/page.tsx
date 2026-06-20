@@ -26,6 +26,8 @@ function fileName(url: string) {
 }
 
 export default function AnnouncementsPage() {
+  const [role, setRole] = useState<string | null>(null);
+  const isBoard = role === "board" || role === "admin";
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -42,9 +44,11 @@ export default function AnnouncementsPage() {
   const cameraRef = useRef<HTMLInputElement>(null);
 
   async function load() {
-    const res = await fetch("/api/announcements");
-    const data = await res.json();
+    const [annRes, meRes] = await Promise.all([fetch("/api/announcements"), fetch("/api/me")]);
+    const data = await annRes.json();
+    const me = await meRes.json();
     setAnnouncements(Array.isArray(data) ? data : []);
+    setRole(me?.role ?? null);
     setLoading(false);
   }
 
@@ -141,9 +145,11 @@ export default function AnnouncementsPage() {
           <h1 className="text-2xl font-bold text-gray-900">Announcements</h1>
           <p className="text-gray-500 text-sm mt-0.5">Board messages to the community</p>
         </div>
-        <button onClick={openNew} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
-          + New announcement
-        </button>
+        {isBoard && (
+          <button onClick={openNew} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+            + New announcement
+          </button>
+        )}
       </div>
 
       {loading ? (
@@ -152,14 +158,16 @@ export default function AnnouncementsPage() {
         <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center">
           <p className="text-4xl mb-3">📢</p>
           <p className="text-gray-500 text-sm mb-4">No announcements yet.</p>
-          <button onClick={openNew} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
-            Post your first announcement
-          </button>
+          {isBoard && (
+            <button onClick={openNew} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+              Post your first announcement
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-4">
-          {pinned.map((a) => <AnnouncementCard key={a.id} a={a} onEdit={openEdit} onDelete={setDeleteId} onTogglePin={togglePin} />)}
-          {regular.map((a) => <AnnouncementCard key={a.id} a={a} onEdit={openEdit} onDelete={setDeleteId} onTogglePin={togglePin} />)}
+          {pinned.map((a) => <AnnouncementCard key={a.id} a={a} isBoard={isBoard} onEdit={openEdit} onDelete={setDeleteId} onTogglePin={togglePin} />)}
+          {regular.map((a) => <AnnouncementCard key={a.id} a={a} isBoard={isBoard} onEdit={openEdit} onDelete={setDeleteId} onTogglePin={togglePin} />)}
         </div>
       )}
 
@@ -281,8 +289,9 @@ export default function AnnouncementsPage() {
   );
 }
 
-function AnnouncementCard({ a, onEdit, onDelete, onTogglePin }: {
+function AnnouncementCard({ a, isBoard, onEdit, onDelete, onTogglePin }: {
   a: Announcement;
+  isBoard: boolean;
   onEdit: (a: Announcement) => void;
   onDelete: (id: string) => void;
   onTogglePin: (a: Announcement) => void;
@@ -310,11 +319,13 @@ function AnnouncementCard({ a, onEdit, onDelete, onTogglePin }: {
             Posted by <span className="font-medium text-gray-500">{a.author.name}</span> · {formatDate(a.publishedAt)}
           </p>
         </div>
-        <div className="flex items-center gap-1 shrink-0">
-          <button onClick={() => onTogglePin(a)} title={a.pinned ? "Unpin" : "Pin to top"} className="p-1.5 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm">📌</button>
-          <button onClick={() => onEdit(a)} className="p-1.5 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-xs font-medium">Edit</button>
-          <button onClick={() => onDelete(a.id)} className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors text-xs font-medium">Delete</button>
-        </div>
+        {isBoard && (
+          <div className="flex items-center gap-1 shrink-0">
+            <button onClick={() => onTogglePin(a)} title={a.pinned ? "Unpin" : "Pin to top"} className="p-1.5 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm">📌</button>
+            <button onClick={() => onEdit(a)} className="p-1.5 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-xs font-medium">Edit</button>
+            <button onClick={() => onDelete(a.id)} className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors text-xs font-medium">Delete</button>
+          </div>
+        )}
       </div>
     </div>
   );
