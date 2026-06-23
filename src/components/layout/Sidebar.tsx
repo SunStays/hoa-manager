@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import PushNotificationToggle from "@/components/PushNotificationToggle";
 
@@ -85,15 +86,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
       <div className="px-3 py-4 border-t border-border space-y-1">
         <PushNotificationToggle />
-        <form action="/api/auth/signout" method="POST">
-          <button
-            type="submit"
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-background hover:text-foreground w-full transition-colors"
-          >
-            <span className="text-base">🚪</span>
-            Sign out
-          </button>
-        </form>
+        <button
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-background hover:text-foreground w-full transition-colors"
+        >
+          <span className="text-base">🚪</span>
+          Sign out
+        </button>
       </div>
     </>
   );
