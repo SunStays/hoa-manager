@@ -49,6 +49,8 @@ export default function SettingsPage() {
             <label className="block text-sm font-medium text-foreground mb-1">Current password</label>
             <input
               type="password"
+              name="current-password"
+              autoComplete="current-password"
               value={current}
               onChange={(e) => setCurrent(e.target.value)}
               required
@@ -60,6 +62,8 @@ export default function SettingsPage() {
             <label className="block text-sm font-medium text-foreground mb-1">New password</label>
             <input
               type="password"
+              name="new-password"
+              autoComplete="new-password"
               value={next}
               onChange={(e) => setNext(e.target.value)}
               required
@@ -71,6 +75,8 @@ export default function SettingsPage() {
             <label className="block text-sm font-medium text-foreground mb-1">Confirm new password</label>
             <input
               type="password"
+              name="confirm-password"
+              autoComplete="new-password"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               required
