@@ -15,13 +15,13 @@ model Community {
   timezone            String               @default("Europe/Amsterdam")
   dueDayOfMonth       Int                  @default(1)
   logoUrl             String?
-  buildingPmName      String?
-  buildingPmPhone     String?
-  buildingPmEmail     String?
   stripeAccountId     String?
   subscriptionStatus  String               @default("trial")
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
+  buildingPmEmail     String?
+  buildingPmName      String?
+  buildingPmPhone     String?
   amenities           Amenity[]
   announcements       Announcement[]
   documents           Document[]
@@ -44,13 +44,13 @@ model Unit {
   status              String               @default("occupied")
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
+  pmEmail             String?
   pmName              String?
   pmPhone             String?
-  pmEmail             String?
   maintenanceRequests MaintenanceRequest[]
   payments            Payment[]
-  voteResponses       VoteResponse[]
   community           Community            @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  voteResponses       VoteResponse[]
   residents           User[]               @relation("UnitResidents")
 
   @@unique([communityId, unitNumber])
@@ -67,23 +67,23 @@ model User {
   pushToken           String?
   avatarUrl           String?
   emailVerified       DateTime?
-  lastSeenAt          DateTime?
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
+  lastSeenAt          DateTime?
   accounts            Account[]
   amenityBookings     AmenityBooking[]
-  announcements        Announcement[]
-  pushSubscriptions   PushSubscription[]
-  uploadedDocuments    Document[]
-  maintenanceRequests  MaintenanceRequest[]
-  maintenanceUpdates   MaintenanceUpdate[]
-  payments             Payment[]
-  residentThread      Thread?              @relation("ResidentThreads")
+  announcements       Announcement[]
   sentMessages        DirectMessage[]      @relation("SentDirectMessages")
+  uploadedDocuments   Document[]
+  maintenanceRequests MaintenanceRequest[]
+  maintenanceUpdates  MaintenanceUpdate[]
+  payments            Payment[]
+  pushSubscriptions   PushSubscription[]
   sessions            Session[]
+  residentThread      Thread?              @relation("ResidentThreads")
   community           Community            @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  units               Unit[]               @relation("UnitResidents")
   voteResponses       VoteResponse[]
+  units               Unit[]               @relation("UnitResidents")
 }
 
 model Account {
@@ -141,11 +141,11 @@ model MaintenanceRequest {
   resolvedAt    DateTime?
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
+  announcements Announcement[]
   community     Community           @relation(fields: [communityId], references: [id], onDelete: Cascade)
   submittedBy   User                @relation(fields: [submittedById], references: [id])
   unit          Unit                @relation(fields: [unitId], references: [id])
   updates       MaintenanceUpdate[]
-  announcements Announcement[]
 }
 
 model MaintenanceUpdate {
@@ -155,8 +155,8 @@ model MaintenanceUpdate {
   message   String
   status    String?
   createdAt DateTime           @default(now())
-  request   MaintenanceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
   author    User               @relation(fields: [authorId], references: [id])
+  request   MaintenanceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
 }
 
 model Announcement {
@@ -166,13 +166,13 @@ model Announcement {
   title                String
   body                 String
   pinned               Boolean             @default(false)
-  attachments          String[]
-  maintenanceRequestId String?
   publishedAt          DateTime            @default(now())
   createdAt            DateTime            @default(now())
+  attachments          String[]
+  maintenanceRequestId String?
   author               User                @relation(fields: [authorId], references: [id])
   community            Community           @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  maintenanceRequest   MaintenanceRequest? @relation(fields: [maintenanceRequestId], references: [id], onDelete: SetNull)
+  maintenanceRequest   MaintenanceRequest? @relation(fields: [maintenanceRequestId], references: [id])
 }
 
 model Vote {
@@ -191,9 +191,9 @@ model VoteResponse {
   id        String   @id @default(cuid())
   voteId    String
   userId    String
-  unitId    String
   option    String
   createdAt DateTime @default(now())
+  unitId    String
   unit      Unit     @relation(fields: [unitId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
   vote      Vote     @relation(fields: [voteId], references: [id], onDelete: Cascade)
@@ -263,11 +263,11 @@ model Document {
   uploadedById String
   title        String
   category     String    @default("other")
-  year         Int?
   fileUrl      String
   fileSize     Int?
   mimeType     String?
   createdAt    DateTime  @default(now())
+  year         Int?
   community    Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
   uploadedBy   User      @relation(fields: [uploadedById], references: [id])
 }
@@ -277,9 +277,9 @@ model Thread {
   communityId String
   residentId  String          @unique
   createdAt   DateTime        @default(now())
+  messages    DirectMessage[]
   community   Community       @relation(fields: [communityId], references: [id], onDelete: Cascade)
   resident    User            @relation("ResidentThreads", fields: [residentId], references: [id])
-  messages    DirectMessage[]
 }
 
 model DirectMessage {
@@ -289,6 +289,6 @@ model DirectMessage {
   body      String
   readAt    DateTime?
   createdAt DateTime  @default(now())
-  thread    Thread    @relation(fields: [threadId], references: [id], onDelete: Cascade)
   sender    User      @relation("SentDirectMessages", fields: [senderId], references: [id])
+  thread    Thread    @relation(fields: [threadId], references: [id], onDelete: Cascade)
 }
